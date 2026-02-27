@@ -94,7 +94,7 @@ export function removeFromBlacklist(userId) {
   }
 }
 
-export function addToBlacklist(ip, ua, userId) {
+export async function addToBlacklist(ip, ua, userId) {
   try {
     // Prevent duplicate same-user block
     const exists = blacklist.some(

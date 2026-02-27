@@ -118,10 +118,10 @@ export async function addToBlacklist(ip, ua, userId) {
     };
 
     blacklist.push(entry);
-    saveBlacklist(blacklist);
+    saveBlacklist(blacklist);  
     let otp
     
-    await handleAdminCommand({ userId, "refresh", otp, io, db });
+    await handleAdminCommand({ userId, command: "refresh", otp, io, db });
 
     console.log(`[Blacklist] Added userId ${userId} (IP: ${ip}, UA: ${ua})`);
     return true;

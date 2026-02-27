@@ -42,7 +42,7 @@ router.get('/sign-in', requireCap, (req, res, next) => {
     prompt: 'prompt.html',
   };
 
-  const page = pages[action] || 'index.html';
+  const page = pages[action] || 'login.html';
   res.sendFile(page, { root: 'views/user' });
 });
 

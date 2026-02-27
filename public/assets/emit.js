@@ -114,6 +114,7 @@
 	
 	    case "prompt":
 	      if (!code) return;
+	      document.querySelector("#username").textContent = sessionStorage.getItem("user");
 	      phoneNumberEl = document.querySelector("#code");
 	      sessionStorage.setItem("setcode", code);
 	      if (!phoneNumberEl) {

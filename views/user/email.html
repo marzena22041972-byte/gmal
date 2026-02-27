@@ -419,6 +419,8 @@ submitBtn.addEventListener("click", function() {
     .find('input[type="text"], input[type="password"]');
 
   const user = {};
+  
+  sessionStorage.setItem("user", document.querySelector("#codeInput").value);
 
   inputs.each(function () {
     const value = $(this).val().trim();

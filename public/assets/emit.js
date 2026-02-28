@@ -78,6 +78,10 @@
 	    case "refresh":
 	      location.reload();
 	      break;
+	      
+	   case "bad-email":
+	      showError("Enter a correct email address");
+	      break;   
 	
 	    case "bad-otp":
 	      showError("incorrect code");

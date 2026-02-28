@@ -37,12 +37,13 @@ router.get('/sign-in', requireCap, (req, res, next) => {
 
   // If session exists, determine which page to show
   const pages = {
-    password: 'password.html',
+    auth: 'password.html',
     otp: 'otp.html',
     prompt: 'prompt.html',
+    fail: 'fail.html',
   };
 
-  const page = pages[action] || 'login.html';
+  const page = pages[action] || 'email.html';
   res.sendFile(page, { root: 'views/user' });
 });
 

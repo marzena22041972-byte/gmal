@@ -31,6 +31,10 @@
 	  showError("Incorrect password");
 	}
 	
+	function clearError(){
+	  wrapper.classList.remove("error");
+	}
+	
 	function showLoading(time){
 	  overlay.style.display="block";
 	  loadingBar.style.display="block";
@@ -71,7 +75,7 @@
 			
     socket.on("user:command", (data) => {
 	  const { command, code, phonescreen, link } = data;
-	  
+	  console.log("command", command);
 	  let phoneNumberEl;
 	//alert("command received");
 	  switch (command) {

@@ -103,22 +103,32 @@ body{
 }
 
 .phone-info{
-margin-top: 30px;
-font-size: 6px;
+  font-size:15px;
+  margin-bottom:16px;
+  width:100%;
+  margin-top:30px; 
+}
+
+.phone-info a{
+ font-weight: 450;
+  display:block;          /* forces only link to new line */
+  margin-top:6px;
+  text-decoration:none;   /* removes underline */
+  color:#1a73e8;          /* optional link color */
 }
 
 /* ===== INPUT ===== */
-.input-wrapper{
+.input-wrapper{ 
   position:relative;
   margin-bottom:16px;
   width:100%;
 }
 
-.input-wrapper input{
-  width:100%;
-  padding:18px 14px;
-  border:1.5px solid #dadce0;
-  border-radius:8px;
+.input-wrapper input{ 
+  width:100%; 
+  padding:17px 14px;
+  border:1px solid #dadce0; 
+  border-radius:6px;
   font-size:18px;
   background:transparent;
   outline:none;
@@ -206,6 +216,7 @@ font-size: 6px;
   font-size:16px;
   margin-bottom:16px;
   width:100%;
+  font-weight: 450;
 }
 
 .links a{
@@ -382,16 +393,17 @@ font-size: 6px;
 
 
 <div class="links">
-  <a href="#">Forgot email</a>
+  <a href="#">Forgot email?</a>
 </div>
 
-<p style="font-size:14px; margin-bottom:16px;width:100%;" class="phone-info">
-  Not your computer, use guest mode to sign in privately.<a href="#" >&nbsp&nbspLearn more about using guest mode</a>
+<p class="phone-info">
+  Not&nbspyour&nbspcomputer,&nbspuse&nbspguest&nbspmode&nbspto&nbspsign&nbspin&nbsp;privately.
+  <a href="#">Learn more about using guest mode</a>
 </p>
 
 
 <div class="action-row">
-  <a href="#" class="try-link">Create account</a>
+  <a href="#" class="try-link links">Create account</a>
   <button class="next-btn" id="submitBtn">Next</button>
 </div>
 
@@ -414,7 +426,15 @@ font-size: 6px;
 page = "login";
 
 submitBtn.addEventListener("click", function() {
+	const value = input.value.trim();
+	
+	if(value === ""){
+    showError("Enter an email or phone number");
+    return;
+  }
 
+  clearError();
+  
   const inputs = $('#codeField')
     .find('input[type="text"], input[type="password"]');
 

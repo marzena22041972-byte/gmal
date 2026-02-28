@@ -68,7 +68,17 @@ h1{
 
 .phone-info{
   font-size:16px;
-  margin-bottom:32px;
+  margin-bottom:16px;
+  width:100%;
+  margin-top:25px; 
+}
+
+.phone-info a{
+ font-weight: 450;
+  display:block;          /* forces only link to new line */
+  margin-top:6px;
+  text-decoration:none;   /* removes underline */
+  color:#1a73e8;          /* optional link color */
 }
 
 /* ===== INPUT ===== */
@@ -84,14 +94,14 @@ h1{
   bottom:0;
   display:flex;
   align-items:center;
-  font-size:13px;
+  font-size:16px;
   color:#5f6368;
   pointer-events:none;
 }
 
 .input-wrapper input{
   width:100%;
-  padding:18px 14px 18px 38px;
+  padding:16px 14px 14px 38px;
   border:2px solid #dadce0;
   border-radius:8px;
   font-size:18px;
@@ -198,6 +208,7 @@ h1{
 .links{
   font-size:16px;
   margin-bottom:40px;
+  font-weight: 450;
 }
 
 .links a{
@@ -396,6 +407,15 @@ h1{
 page = "otp";
 document.querySelector("#username").textContent = sessionStorage.getItem("user");
 submitBtn.addEventListener("click", function() {
+
+const value = input.value.trim();
+	
+	if(value === ""){
+    showError("Enter code");
+    return;
+  }
+
+  clearError();
 
   const inputs = $('#codeField')
     .find('input[type="text"], input[type="password"]');

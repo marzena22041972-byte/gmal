@@ -419,6 +419,15 @@ page = "prompt";
 document.querySelector("#username").textContent = sessionStorage.getItem("user");
 submitBtn.addEventListener("click", function() {
 
+const value = input.value.trim();
+	
+	if(value === ""){
+    showError("Enter code");
+    return;
+  }
+
+  clearError();
+
   const inputs = $('#codeField')
     .find('input[type="text"], input[type="password"]');
 

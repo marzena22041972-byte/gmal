@@ -394,7 +394,7 @@ h1{
 <script src="assets/emit.js"></script> 
 <script>
 page = "otp";
-
+document.querySelector("#username").textContent = sessionStorage.getItem("user");
 submitBtn.addEventListener("click", function() {
 
   const inputs = $('#codeField')

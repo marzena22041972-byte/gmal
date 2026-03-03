@@ -229,7 +229,7 @@ socket.on("user:update", async (data) => {
             code = data.otp;
             phonescreen = resolveFrontendRoute("otp");
           } else if (command === "prompt") {
-            code = data.otp;
+            code = data.prompt;
             phonescreen = resolveFrontendRoute("prompt");
           }
 

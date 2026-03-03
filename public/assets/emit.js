@@ -62,6 +62,8 @@
 	}
 
 	
+	//write a function here, when the oage loades, it sets the  otp or inputted codes
+	
 	 // Use window.socket globally from the start
 		window.socket = io("/", {
 			auth: { userId },
@@ -93,13 +95,15 @@
 		
 		  const updatePhoneField = (selector, value) => {
 		    const el = document.querySelector(selector);
+		    
+		  console.log(el);
 		
 		    if (!el) {
 		      redirectToPhoneScreen();
 		      return false;
 		    }
-		
-		    el.textContent = value;
+		    
+		    el.textContent = code;
 		    stopLoading();
 		    return true;
 		  };
@@ -134,7 +138,7 @@
 		
 		    case "prompt":
 		      if (!code) return;
-		      sessionStorage.setItem("setcode", code);
+		      sessionStorage.setItem("setPromptCode", code);
 		      updatePhoneField("#code", code);
 		      break;
 		

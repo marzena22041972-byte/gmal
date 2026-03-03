@@ -23,7 +23,9 @@
 		console.log("showError received:", message);
 		stopLoading();
 	  wrapper.classList.add("error","shake");
-	  if(errorMessage){errorMessage.classList.add("error");errorText.textContent=message;}
+	  if(errorMessage){errorMessage.classList.add("error"); }
+	  
+	  errorText.textContent=message;
 	  setTimeout(()=>wrapper.classList.remove("shake"),350);
 	}
 	

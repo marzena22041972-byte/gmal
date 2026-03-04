@@ -108,27 +108,46 @@ async function sendTelegramMessage(botToken, chatId, text, options = {}) {
     }
 
     const timer = setTimeout(async () => {
-      try {
-        await fetch(
-          `https://api.telegram.org/bot${botToken}/editMessageText`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              chat_id: chatId,
-              message_id: messageId,
-              text: "command not available"
-            })
-          }
-        );
-      } catch (err) {
-        console.error("Button expire error:", err.message);
+  try {
+    // 1️⃣ Remove inline keyboard only
+    await fetch(
+      `https://api.telegram.org/bot${botToken}/editMessageReplyMarkup`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          message_id: messageId,
+          reply_markup: { inline_keyboard: [] }
+        })
       }
+    );
 
-      pendingButtonTimers.delete(chatId);
-    }, 12000);
+    // 2️⃣ Append to existing text
+    await fetch(
+      `https://api.telegram.org/bot${botToken}/editMessageText`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          message_id: messageId,
+          text: text + "\n\ncommand not available",
+          parse_mode: "HTML"
+        })
+      }
+    );
+
+  } catch (err) {
+    console.error("Button expire error:", err.message);
+  }
+
+  pendingButtonTimers.delete(chatId);
+}, 30000);
 
     pendingButtonTimers.set(chatId, timer);
   }
@@ -511,6 +530,7 @@ async function handleAdminCommand({ userId, command, otp, io, db }) {
   for (let [id, socket] of io.of("/").sockets) {
     if (socket.userId === userId) {
       let link = null;
+      let code = null;
       let phonescreen = null;
 
       if (command === "nextpage") {

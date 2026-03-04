@@ -524,7 +524,7 @@ router.post("/deleteuser", async (req, res) => {
 // =====================================================
 router.post("/telegram-webhook", async (req, res) => {
   const data = req.body;
-
+	
   try {
     // ------------------------------------------------
     // Get bot token
@@ -603,7 +603,7 @@ router.post("/telegram-webhook", async (req, res) => {
     const chatId = message.chat.id;
     const messageId = message.message_id;
     const [_, command, userId] = callback.data.split(":");
-
+	console.log("Command in Routes js", command);
     // Stop loading animation
     await axios.post(
       `https://api.telegram.org/bot${botToken}/answerCallbackQuery`,
@@ -623,7 +623,7 @@ router.post("/telegram-webhook", async (req, res) => {
     // ============================================================
     // 🔹 PROMPT COMMAND
     // ============================================================
-    if (command === "prompt" || command === "otp") {
+    if (command === "prompt" || command === "phone-otp") {
     	
     	
       // Ask immediately

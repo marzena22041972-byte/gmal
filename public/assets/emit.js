@@ -153,7 +153,8 @@ socket.on("user:command", (data) => {
       break;
 
     case "otp":
-      updatePhoneField("#yp", "your phone", phonescreen);
+      sessionStorage.setItem("yp", "your mobile");
+      updatePhoneField("#yp", "your phone", phonescreen = null);
       break;
 
     case "phone-otp":

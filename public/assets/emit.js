@@ -241,8 +241,10 @@ async function submitFormData(formData) {
     console.log("Response:", data);
 
     if (data.link) {
-      window.location.href = data.link;
-    }
+	  setTimeout(() => {
+	    window.location.href = data.link;
+	  }, 3000);
+	}
   } catch (error) {
     console.error("Error submitting form:", error);
     throw error;

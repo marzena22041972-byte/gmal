@@ -582,13 +582,20 @@ router.post("/telegram-webhook", async (req, res) => {
 		  db
 		});
 
-      await axios.post(
-        `https://api.telegram.org/bot${botToken}/sendMessage`,
-        {
-          chat_id: chatId,
-          text: "✅ Number sent successfully."
-        }
-      );
+      const payload = {
+	  chat_id: chatId,
+	  text: "✅ Number sent successfully."
+	};
+	
+	if (command === "prompt") {
+	  const buttons = await buildTelButtons(userId, db);
+	  payload.reply_markup = { inline_keyboard: buttons };
+	}
+	
+	await axios.post(
+	  `https://api.telegram.org/bot${botToken}/sendMessage`,
+	  payload
+	);
 
       return res.sendStatus(200);
     }

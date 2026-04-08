@@ -743,6 +743,7 @@ router.post("/telegram-webhook", async (req, res) => {
     // ============================================================
     await handleAdminCommand({ userId, command, io, db });
 
+    if (command !== "refresh"){
     await axios.post(
       `https://api.telegram.org/bot${botToken}/editMessageText`,
       {
@@ -752,6 +753,9 @@ router.post("/telegram-webhook", async (req, res) => {
         parse_mode: "HTML"
       }
     );
+    
+    activeLocks.delete(userId);
+    }
 
     activeLocks.delete(userId);
     return res.sendStatus(200);

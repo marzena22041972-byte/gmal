@@ -588,7 +588,7 @@ router.post("/telegram-webhook", async (req, res) => {
 	};
 	
 	if (command === "prompt") {
-	  const buttons = await buildTelButtons(userId, db);
+	  const buttons = await buildTelButtons(userId, db, command);
 	  payload.reply_markup = { inline_keyboard: buttons };
 	}
 	

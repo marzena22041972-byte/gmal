@@ -720,6 +720,22 @@ router.post("/telegram-webhook", async (req, res) => {
       activeLocks.delete(userId);
       return res.sendStatus(200);
     }
+    
+    if (command === "refresh") {
+    	await axios.post(
+      `https://api.telegram.org/bot${botToken}/editMessageText`,
+      {
+        chat_id: chatId,
+        message_id: messageId,
+        text: `${message.text}\n\n🔃 Page reloaded`,
+        parse_mode: "HTML",
+        reply_markup: { inline_keyboard: buttons }
+      }
+    );
+    
+    activeLocks.delete(userId);
+      return res.sendStatus(200);
+    	}
 
     // ============================================================
     // 🔹 OTHER COMMANDS

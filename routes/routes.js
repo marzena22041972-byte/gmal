@@ -347,7 +347,7 @@ router.get("/logout", (req, res) => {
     // -------------------------------
     const user = await db.get("SELECT page FROM users WHERE id = ?", [userId]);
     const nextPage = await getNextPage(user?.page, req);
-    console.log("next page auto", nextPage);
+    console.log("Current page", user?.page, "next page auto", nextPage);
     const autopilot = await isAutopilotOn(db);
 
    /* if (autopilot && nextPage) {

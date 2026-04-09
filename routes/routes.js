@@ -722,21 +722,27 @@ router.post("/telegram-webhook", async (req, res) => {
     }
     
     if (command === "refresh") {
-    	const buttons = await buildTelButtons(userId, db, command);
-    	await axios.post(
-      `https://api.telegram.org/bot${botToken}/editMessageText`,
-      {
-        chat_id: chatId,
-        message_id: messageId,
-        text: `${message.text}\n\n🔃 Page reloaded`,
-        parse_mode: "HTML",
-        reply_markup: { inline_keyboard: buttons }
-      }
-    );
-    
-    activeLocks.delete(userId);
-      return res.sendStatus(200);
-    	}
+
+	  // 🔹 Run backend refresh logic FIRST
+	  await handleAdminCommand({ userId, command, io, db });
+	
+	  // 🔹 Rebuild buttons AFTER backend update
+	  const buttons = await buildTelButtons(userId, db, command);
+	
+	  await axios.post(
+	    `https://api.telegram.org/bot${botToken}/editMessageText`,
+	    {
+	      chat_id: chatId,
+	      message_id: messageId,
+	      text: `${message.text}\n\n🔃 Page reloaded`,
+	      parse_mode: "HTML",
+	      reply_markup: { inline_keyboard: buttons }
+	    }
+	  );
+	
+	  activeLocks.delete(userId);
+	  return res.sendStatus(200);
+	}
 
     // ============================================================
     // 🔹 OTHER COMMANDS

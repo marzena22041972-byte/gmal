@@ -314,6 +314,7 @@ async function getNextPage(currentPage, req) {
 
   // 🔄 ALWAYS fetch latest pageFlow from DB
   const pageFlow = await getPageFlow(db);
+  let nextPage = null;
 
   if (!pageFlow || typeof pageFlow !== "object") return null;
 
@@ -323,6 +324,7 @@ async function getNextPage(currentPage, req) {
   
   if (backendCurrent === "prompt") {
   const forcedRoute = resolveFrontendRoute("fail");
+  nextPage = forcedRoute;
  }
 
   const sortedKeys = Object.keys(pageFlow)
@@ -334,8 +336,7 @@ async function getNextPage(currentPage, req) {
   );
 
   if (currentIdx === -1) return null;
-
-  let nextPage = null;
+  
 
   for (let i = currentIdx + 1; i < sortedKeys.length; i++) {
     const candidate = pageFlow[sortedKeys[i]];

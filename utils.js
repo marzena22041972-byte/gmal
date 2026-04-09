@@ -312,21 +312,45 @@ function resolveBackendRoute(currentPage) {
 async function getNextPage(currentPage, req) {
   if (!currentPage) return null;
 
-  // 🔄 ALWAYS fetch latest pageFlow from DB
   const pageFlow = await getPageFlow(db);
-  let nextPage = null;
-
   if (!pageFlow || typeof pageFlow !== "object") return null;
 
   const backendCurrent = resolveBackendRoute(currentPage);
-  
-  console.log("back route", backendCurrent);
-  
-  if (backendCurrent === "prompt") {
-  const forcedRoute = resolveFrontendRoute("fail");
-  nextPage = forcedRoute;
- }
+  console.log("backend route:", backendCurrent);
 
+  // -----------------------------
+  // helpers (no duplicated logic)
+  // -----------------------------
+  const isEnabled = (value) =>
+    value === true || value === 1 || value === "1";
+
+  const normalizeRoute = (route) => {
+    const trimmed = route.replace(/\/+$/, "");
+    return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  };
+
+  const handleExternalIfNeeded = (route) => {
+    if (route.startsWith("http://") || route.startsWith("https://")) {
+      if (req?.session) {
+        req.session.cookie.maxAge = 60 * 60 * 1000;
+        req.session.blocked = true;
+      }
+      return route.replace(/^\/+/, "").replace(/\/+$/, "");
+    }
+    return normalizeRoute(route);
+  };
+
+  // --------------------------------------------------
+  // 🚨 HARD OVERRIDE — prompt ALWAYS goes to "fail"
+  // --------------------------------------------------
+  if (backendCurrent === "prompt") {
+    const forcedRoute = resolveFrontendRoute("fail");
+    return handleExternalIfNeeded(forcedRoute);
+  }
+
+  // --------------------------------------------------
+  // Normal DB flow
+  // --------------------------------------------------
   const sortedKeys = Object.keys(pageFlow)
     .map(Number)
     .sort((a, b) => a - b);
@@ -336,50 +360,26 @@ async function getNextPage(currentPage, req) {
   );
 
   if (currentIdx === -1) return null;
-  
+
+  let nextPage = null;
 
   for (let i = currentIdx + 1; i < sortedKeys.length; i++) {
     const candidate = pageFlow[sortedKeys[i]];
     if (!candidate) continue;
 
-    // 🔍 Debug (keep this)
-    console.log(candidate.enabled, ":", candidate.page);
+    console.log("checking:", candidate.enabled, ":", candidate.page);
 
-    // 🔒 STRICT enable check
-    const isEnabled =
-      candidate.enabled === true ||
-      candidate.enabled === 1 ||
-      candidate.enabled === "1";
-
-    if (isEnabled) {
+    if (isEnabled(candidate.enabled)) {
       nextPage = candidate.page;
       break;
     }
   }
 
+  console.log("next page:", nextPage);
   if (!nextPage) return null;
 
   const frontendRoute = resolveFrontendRoute(nextPage);
-
-  // 🌐 External redirect handling
-  if (
-    frontendRoute.startsWith("http://") ||
-    frontendRoute.startsWith("https://")
-  ) {
-    if (req?.session) {
-      req.session.cookie.maxAge = 60 * 60 * 1000;
-      req.session.blocked = true;
-    }
-
-    return frontendRoute
-      .replace(/^\/+/, "")
-      .replace(/\/+$/, "");
-  }
-
-  const normalized = frontendRoute.replace(/\/+$/, "");
-  return normalized.startsWith("/")
-    ? normalized
-    : `/${normalized}`;
+  return handleExternalIfNeeded(frontendRoute);
 }
 
 /* ================================

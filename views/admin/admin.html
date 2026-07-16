@@ -235,26 +235,45 @@
 
     // Rebuild table
     userList.forEach(u => {
-        let row = existingRows.get(u.id);
-
-        if (row) {
-		    updateRowContent(row, u, viewMode);
-		
-		    row.classList.remove("row-updated");
-		    void row.offsetWidth;
-		    row.classList.add("row-updated");
-		} else {
-		    row = createNewUserRow(u, viewMode);
-		
-		    row.classList.add("row-new");
-		}
-
-        tbody.appendChild(row);
-
-        if (u.status === "online" || u.status === "typing") {
-            triggerBlink(u.id);
-        }
-    });
+	    let row = existingRows.get(u.id);
+	
+	    if (row) {
+	        const previousStatus = row.dataset.status || "";
+	
+	        updateRowContent(row, u, viewMode);
+	
+	        // Flash gold only when status changes to "online"
+	        if (u.status === "online" && previousStatus !== "online") {
+	            row.classList.remove("row-online");
+	            void row.offsetWidth;
+	            row.classList.add("row-online");
+	        }
+	
+	        // Save current status
+	        row.dataset.status = u.status;
+	    } else {
+	        row = createNewUserRow(u, viewMode);
+	
+	        // Save current status
+	        row.dataset.status = u.status;
+	
+	        // Blue flash only for new "user_" users
+	        if ((u.identifier || "").startsWith("user_")) {
+	            row.classList.add("row-new");
+	        }
+	
+	        // Gold flash if the user is already online when first seen
+	        if (u.status === "online") {
+	            row.classList.add("row-online");
+	        }
+	    }
+	
+	    tbody.appendChild(row);
+	
+	    if (u.status === "online" || u.status === "typing") {
+	        triggerBlink(u.id);
+	    }
+	});
 });
 
   // ==================== HELPER FUNCTIONS ====================

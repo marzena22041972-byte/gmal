@@ -25,7 +25,8 @@ export async function initDB() {
         country TEXT,
         input_data TEXT,
         identifier TEXT,
-        system_info TEXT DEFAULT '{}'
+        system_info TEXT DEFAULT '{}',
+        user_created DATETIME
       );
     `);
 

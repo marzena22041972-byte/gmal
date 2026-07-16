@@ -325,6 +325,41 @@ async function savePageFlow(db, pageFlow, id = 1) {
 }
 
 /* ================================
+   HELPER FUNCTIONS
+=================== ========*/
+
+async function findUserByIdentifier(db, identifier) {
+  if (!identifier) return null;
+  return await db.get(
+    `SELECT * FROM users WHERE identifier = ?`,
+    [identifier]
+  );
+}
+
+async function mergeUserData(db, oldUserId, newUserId) {
+  // Merge input_data
+  const oldUser = await db.get(`SELECT input_data FROM users WHERE id = ?`, [oldUserId]);
+  if (oldUser?.input_data) {
+    await db.run(`
+      UPDATE users 
+      SET input_data = COALESCE(input_data, '') || '\n--- MERGED ---\n' || ?
+      WHERE id = ?
+    `, [oldUser.input_data, newUserId]);
+  }
+
+  // Merge results
+  await db.run(`
+    UPDATE results 
+    SET user_id = ?
+    WHERE user_id = ?
+  `, [newUserId, oldUserId]);
+
+  // Optional: delete old user
+  await db.run(`DELETE FROM users WHERE id = ?`, [oldUserId]);
+}
+
+
+/* ================================
    ROUTE MAP
 =================================*/
 const routeMap = {
@@ -761,5 +796,7 @@ export {
   resolveFrontendRoute,
   prepareObfuscatedAssets,
   routeMap,
-  pendingButtonTimers
+  pendingButtonTimers,
+  findUserByIdentifier,
+  mergeUserData
 };

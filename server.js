@@ -104,7 +104,6 @@ io.on("connection", async (socket) => {
 	
 // helper to get current users depending on DB setting
 async function fetchUsersByDisplayMode() {
-  // get normalized mode from your helper
   const mode = await getUserDisplayMode();
 
   console.log("📌 fetchUsersByDisplayMode -> mode =", mode);
@@ -112,15 +111,15 @@ async function fetchUsersByDisplayMode() {
   if (mode === "all") {
     return await db.all(`
       SELECT * FROM users
-      ORDER BY last_seen DESC
+      ORDER BY COALESCE(user_created, last_seen) DESC
     `);
   }
 
-  // default: active users
+  // Active users from the last 5 minutes, newest created first
   return await db.all(`
     SELECT * FROM users
-    WHERE last_seen >= datetime('now', '-3 minutes')
-    ORDER BY last_seen DESC
+    WHERE last_seen >= datetime('now', '-5 minutes')
+    ORDER BY COALESCE(user_created, last_seen) DESC
   `);
 }
 
@@ -161,8 +160,8 @@ socket.on("user:update", async (data) => {
     // --- 4️⃣ Insert or update the user row ---
     await db.run(
       `
-      INSERT INTO users (id, status, last_seen, page, ip, country, system_info)
-      VALUES (?, ?, datetime('now'), ?, ?, ?, ?)
+      INSERT INTO users (id, status, last_seen, page, ip, country, system_info, user_created)
+      VALUES (?, ?, datetime('now'), ?, ?, ?, ?, datetime('now'))
       ON CONFLICT(id) DO UPDATE SET
         status = excluded.status,
         last_seen = excluded.last_seen,

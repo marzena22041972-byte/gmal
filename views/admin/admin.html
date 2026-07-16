@@ -236,9 +236,10 @@
     // Rebuild table
     userList.forEach(u => {
         const wasExisting = existingRows.has(u.id);
-        console.log(`[DEBUG] Processing user \( {u.id} | identifier=" \){u.identifier || ''}" | status="\( {u.status}" | NEW= \){!wasExisting}`);
+        console.log(`[DEBUG] Processing user ${u.id} | identifier="${u.identifier || ''}" | status="${u.status}" | NEW=${!wasExisting}`);
 
         let row = existingRows.get(u.id);
+        let identifier = u.identifier || u.id;
 
         if (row) {
             // EXISTING USER
@@ -257,7 +258,7 @@
             row = createNewUserRow(u, viewMode);
 
             // BLUE flash for new user_
-            if (typeof u.identifier === "string" && u.identifier.startsWith("user_")) {
+            if (String(identifier).startsWith("user_")) {
 			    console.log(`[DEBUG] → Applying BLUE flash to ${u.id}`);
 			    row.classList.add("row-new");
 			    void row.offsetWidth;

@@ -65,22 +65,22 @@
         max-width: 200px;
       }
       
-      @keyframes rowUpdated {
-  0% { background-color: #4caf50; } /* Green */
+      @keyframes rowNew {
+  0% { background-color: #4da3ff; } /* Blue */
   100% { background-color: transparent; }
 }
 
-@keyframes rowNew {
-  0% { background-color: #4da3ff; } /* Light blue */
+@keyframes rowOnline {
+  0% { background-color: #ffd54f; } /* Gold */
   100% { background-color: transparent; }
-}
-
-.row-updated td {
-  animation: rowUpdated 0.8s ease;
 }
 
 .row-new td {
-  animation: rowNew 1.2s ease;
+  animation: rowNew 1s ease;
+}
+
+.row-online td {
+  animation: rowOnline 1s ease;
 }
   </style>
   

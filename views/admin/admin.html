@@ -221,14 +221,13 @@
     const tbody = document.querySelector("#userTable tbody");
 
     sound.play();
-
-    // Save existing rows
-    const existingRows = new Map();
-    tbody.querySelectorAll("tr").forEach(row => {
-        const deleteBtn = row.querySelector("button[data-id]");
-        const id = deleteBtn ? deleteBtn.dataset.id : null;
-        if (id) existingRows.set(id, row);
-    });
+    
+    // Save references to existing rows
+		const existingRows = new Map();
+		tbody.querySelectorAll("tr").forEach(row => {
+		    const id = row.dataset.id;           // ← Changed to use row's data-id
+		    if (id) existingRows.set(id, row);
+		});
 
     console.log(`[DEBUG] Before rebuild - ${existingRows.size} existing rows`);
 
@@ -300,6 +299,7 @@
     }
 
     const row = document.createElement("tr");
+	row.dataset.id = u.id; 
 
     if (viewMode === "all") {
         const isBlocked = u.status === "blocked";

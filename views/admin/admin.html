@@ -222,53 +222,51 @@
 
     sound.play();
 
-    // === DEBUG: Save existing rows ===
+    // Save existing rows
     const existingRows = new Map();
     tbody.querySelectorAll("tr").forEach(row => {
         const deleteBtn = row.querySelector("button[data-id]");
         const id = deleteBtn ? deleteBtn.dataset.id : null;
-        if (id) {
-            existingRows.set(id, row);
-            console.log(`[DEBUG] Existing row found: ${id}`);
-        }
+        if (id) existingRows.set(id, row);
     });
 
-    console.log(`[DEBUG] Before clear - existing rows: ${existingRows.size}`);
+    console.log(`[DEBUG] Before rebuild - ${existingRows.size} existing rows`);
 
     tbody.innerHTML = "";
 
+    // Rebuild table
     userList.forEach(u => {
-        const isNew = !existingRows.has(u.id);
-        console.log(`[DEBUG] User \( {u.id} | identifier=" \){u.identifier}" | status="${u.status}" | NEW? ${isNew}`);
+        const wasExisting = existingRows.has(u.id);
+        console.log(`[DEBUG] Processing user \( {u.id} | identifier=" \){u.identifier || ''}" | status="\( {u.status}" | NEW= \){!wasExisting}`);
 
         let row = existingRows.get(u.id);
 
         if (row) {
-            // Existing user
-            console.log(`[DEBUG] Updating existing user: ${u.id}`);
+            // EXISTING USER
+            console.log(`[DEBUG] → Updating existing row`);
             updateRowContent(row, u, viewMode);
 
+            // Gold flash on status change to online
             if (previousUsers.get(u.id)?.status !== "online" && u.status === "online") {
-                console.log(`[DEBUG] Gold flash (status change) for ${u.id}`);
                 row.classList.remove("row-online");
                 void row.offsetWidth;
                 row.classList.add("row-online");
             }
         } else {
-            // New user
-            console.log(`[DEBUG] Creating NEW user row: ${u.id}`);
+            // NEW USER
+            console.log(`[DEBUG] → Creating NEW row`);
             row = createNewUserRow(u, viewMode);
 
-            // BLUE flash
+            // BLUE flash for new user_
             if ((u.identifier || "").startsWith("user_")) {
-                console.log(`[DEBUG] Applying BLUE flash to new user: ${u.id}`);
+                console.log(`[DEBUG] → Applying BLUE flash to ${u.id}`);
                 row.classList.add("row-new");
-                void row.offsetWidth;   // critical
+                void row.offsetWidth;   // Force animation
             }
 
-            // Gold if already online
+            // Gold flash if new user is already online
             if (u.status === "online") {
-                console.log(`[DEBUG] Applying GOLD flash to new online user: ${u.id}`);
+                console.log(`[DEBUG] → Applying GOLD flash to new online user`);
                 row.classList.add("row-online");
             }
         }

@@ -257,7 +257,7 @@
             row = createNewUserRow(u, viewMode);
 
             // BLUE flash for new user_
-            if ((u.identifier || "").startsWith("user_")) {
+            if ((u.identifier).startsWith("user_")) {
                 console.log(`[DEBUG] → Applying BLUE flash to ${u.id}`);
                 row.classList.add("row-new");
                 void row.offsetWidth;   // Force animation
@@ -305,6 +305,8 @@
         const isBlocked = u.status === "blocked";
         const blockBtnLabel = isBlocked ? "Unblock" : "Block";
         const blockBtnColor = isBlocked ? "red" : "#222";
+        
+        console.log("identifier", u.identifier);
 
         row.innerHTML = `
             <td>${u.identifier || u.id}</td>

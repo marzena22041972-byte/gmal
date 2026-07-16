@@ -215,54 +215,58 @@
 
   // ✅ Receive admin user updates
   socket.on("admin:update", (userList) => {
-    
+    const previousUsers = new Map(users.map(u => [u.id, u]));
+
     users = userList;
     const tbody = document.querySelector("#userTable tbody");
 
     sound.play();
 
-    console.log(viewMode, users);
-
-    // Save references to existing rows
+    // === STEP 1: Remember which users are currently displayed ===
     const existingRows = new Map();
     tbody.querySelectorAll("tr").forEach(row => {
         const deleteBtn = row.querySelector("button[data-id]");
-        const id = deleteBtn ? deleteBtn.dataset.id : null;
+        const id = deleteBtn?.dataset.id;
         if (id) existingRows.set(id, row);
     });
 
-    // Clear table
-    tbody.innerHTML = "";
+    tbody.innerHTML = "";   // Clear table
 
-    // Rebuild table
+    // === STEP 2: Rebuild ===
     userList.forEach(u => {
         let row = existingRows.get(u.id);
-        
+
         if (row) {
+            // EXISTING USER
             updateRowContent(row, u, viewMode);
 
+            // Gold flash on becoming online
+            if (previousUsers.get(u.id)?.status !== "online" && u.status === "online") {
+                row.classList.remove("row-online");
+                void row.offsetWidth;
+                row.classList.add("row-online");
+            }
         } else {
+            // NEW USER
             row = createNewUserRow(u, viewMode);
+
+            // BLUE flash for new user_ accounts
+            if ((u.identifier || "").startsWith("user_")) {
+                row.classList.add("row-new");
+                void row.offsetWidth;        // Important for animation
+            }
+
+            // Gold flash if new user joins already online
+            if (u.status === "online") {
+                row.classList.add("row-online");
+            }
         }
 
         tbody.appendChild(row);
-        
-        // Gold flash if new user is already online
-            if (u.status === "typing") {
-                row.classList.add("row-online");
-                void row.offsetWidth;
-                row.classList.add("row-online");
-            }
-        
-        if ((!u.identifier)) {
-                row.classList.add("row-new");
-                void row.offsetWidth;
-                row.classList.remove("row-new");
-            }
 
-       /* if (u.status === "online" || u.status === "typing") {
+        if (u.status === "online" || u.status === "typing") {
             triggerBlink(u.id);
-        } */
+        }
     });
 });
 

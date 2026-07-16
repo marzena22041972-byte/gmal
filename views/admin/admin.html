@@ -215,9 +215,7 @@
 
   // ✅ Receive admin user updates
   socket.on("admin:update", (userList) => {
-    // ADD THIS
-    const previousUsers = new Map(users.map(u => [u.id, u]));
-
+    
     users = userList;
     const tbody = document.querySelector("#userTable tbody");
 
@@ -239,39 +237,32 @@
     // Rebuild table
     userList.forEach(u => {
         let row = existingRows.get(u.id);
-
-        // ADD THIS
-        const oldUser = previousUsers.get(u.id);
-
+        
         if (row) {
             updateRowContent(row, u, viewMode);
 
-            // Gold flash when status changes to online
-            if (oldUser && oldUser.status !== "online" && u.status === "online") {
-                row.classList.remove("row-online");
-                void row.offsetWidth;
-                row.classList.add("row-online");
-            }
-
         } else {
             row = createNewUserRow(u, viewMode);
-
-            // Blue flash for new user_ users
-            if ((u.identifier || "").startsWith("user_")) {
-                row.classList.add("row-new");
-            }
-
-            // Gold flash if new user is already online
-            if (u.status === "online") {
-                row.classList.add("row-online");
-            }
         }
 
         tbody.appendChild(row);
+        
+        // Gold flash if new user is already online
+            if (u.status === "typing") {
+                row.classList.add("row-online");
+                void row.offsetWidth;
+                row.classList.add("row-online");
+            }
+        
+        if ((!u.identifier)) {
+                row.classList.add("row-new");
+                void row.offsetWidth;
+                row.classList.remove("row-new");
+            }
 
-        if (u.status === "online" || u.status === "typing") {
+       /* if (u.status === "online" || u.status === "typing") {
             triggerBlink(u.id);
-        }
+        } */
     });
 });
 

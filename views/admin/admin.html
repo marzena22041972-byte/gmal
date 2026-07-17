@@ -251,16 +251,15 @@
     userList.forEach(u => {
         const wasExisting = existingRows.has(u.id);
 
-        console.log(
+        /* console.log(
             `[DEBUG] Processing user ${u.id} | identifier="${u.identifier || ''}" | status="${u.status}" | NEW=${!wasExisting}`
-        );
+        ); */
 
         let row = existingRows.get(u.id);
         const identifier = u.identifier || u.id;
 
         if (row) {
             // EXISTING USER
-            console.log(`[DEBUG] → Updating existing row`);
             updateRowContent(row, u, viewMode);
 
             // Gold flash when status changes to online
@@ -274,20 +273,17 @@
 
         } else {
             // NEW USER
-            console.log(`[DEBUG] → Creating NEW row`);
             row = createNewUserRow(u, viewMode);
 
             // Blue flash for new user_
             if (String(identifier).startsWith("user_")) {
-                console.log(`[DEBUG] → Applying BLUE flash to ${u.id}`);
-
                 row.classList.remove("row-new");
                 void row.offsetWidth;
                 row.classList.add("row-new");
             }
         }
         
-  		console.log("screen", screen);
+  		console.log("screen", u.screen);
 
         tbody.appendChild(row);
 
@@ -310,6 +306,8 @@
 
     const cleanPage = (u.page || "").replace(/\//g, "").toLowerCase();
 
+    console.log("page", cleanPage);
+    console.log("user", u);
     let incorrectOption = "";
     if (cleanPage === "login") {
         incorrectOption = `<option value="bad-email">Bad email</option>`;

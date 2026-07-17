@@ -21,6 +21,7 @@ export async function initDB() {
         status TEXT,
         last_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
         page TEXT,
+        screen TEXT,
         ip TEXT,
         country TEXT,
         input_data TEXT,

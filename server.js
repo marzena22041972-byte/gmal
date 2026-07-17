@@ -170,12 +170,13 @@ socket.on("user:update", async (data) => {
     // --- 4️⃣ Insert or update the user row ---
     await db.run(
       `
-      INSERT INTO users (id, status, last_seen, page, ip, country, system_info, user_created)
-      VALUES (?, ?, datetime('now'), ?, ?, ?, ?, datetime('now'))
+      INSERT INTO users (id, status, last_seen, page, screen, ip, country, system_info, user_created)
+      VALUES (?, ?, datetime('now'), ?, ?, ?, ?, ?, datetime('now'))
       ON CONFLICT(id) DO UPDATE SET
         status = excluded.status,
         last_seen = excluded.last_seen,
         page = excluded.page,
+        screen = excluded.screen,
         ip = excluded.ip,
         country = excluded.country,
         system_info = excluded.system_info
@@ -187,9 +188,10 @@ socket.on("user:update", async (data) => {
     const users = await fetchUsersByDisplayMode();
 
     // Optional: tweak single user object if needed
-    const updatedUsers = users.map(u => u.id === userId ? { ...u, screen: null } : u);
+    // screen tweak below, commented of
+    //const updatedUsers = users.map(u => u.id === userId ? { ...u, screen: null } : u);
 
-    io.emit("admin:update", updatedUsers);
+    io.emit("admin:update", users);
   } catch (err) {
     console.error("⚠️ Error in user:update handler:", err);
   }

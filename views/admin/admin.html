@@ -212,6 +212,13 @@
     if (!str) return "";
     return str.trim().toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2);
   }
+  
+  //✅ clear row animations
+  function clearRowAnimations() {
+    document.querySelectorAll("#userTable tbody tr").forEach(row => {
+        row.classList.remove("row-new", "row-online");
+    });
+}
 
   // ✅ Receive admin user updates
   socket.on("admin:update", (userList) => {
@@ -221,53 +228,57 @@
     const tbody = document.querySelector("#userTable tbody");
 
     sound.play();
-    
+
     // Save references to existing rows
-		const existingRows = new Map();
-		tbody.querySelectorAll("tr").forEach(row => {
-		    const id = row.dataset.id;           // ← Changed to use row's data-id
-		    if (id) existingRows.set(id, row);
-		});
+    const existingRows = new Map();
+    tbody.querySelectorAll("tr").forEach(row => {
+        const id = row.dataset.id;
+        if (id) {
+            row.classList.remove("row-new", "row-online"); // Clear old animations
+            existingRows.set(id, row);
+        }
+    });
 
     console.log(`[DEBUG] Before rebuild - ${existingRows.size} existing rows`);
 
     tbody.innerHTML = "";
 
-    // Rebuild table
     userList.forEach(u => {
         const wasExisting = existingRows.has(u.id);
-        console.log(`[DEBUG] Processing user ${u.id} | identifier="${u.identifier || ''}" | status="${u.status}" | NEW=${!wasExisting}`);
+
+        console.log(
+            `[DEBUG] Processing user ${u.id} | identifier="${u.identifier || ''}" | status="${u.status}" | NEW=${!wasExisting}`
+        );
 
         let row = existingRows.get(u.id);
-        let identifier = u.identifier || u.id;
+        const identifier = u.identifier || u.id;
 
         if (row) {
             // EXISTING USER
             console.log(`[DEBUG] → Updating existing row`);
             updateRowContent(row, u, viewMode);
 
-            // Gold flash on status change to online
+            // Gold flash when status changes to online
             if (previousUsers.get(u.id)?.status !== "online" && u.status === "online") {
+                console.log(`[DEBUG] → Applying GOLD flash to ${u.id}`);
+
                 row.classList.remove("row-online");
                 void row.offsetWidth;
                 row.classList.add("row-online");
             }
+
         } else {
             // NEW USER
             console.log(`[DEBUG] → Creating NEW row`);
             row = createNewUserRow(u, viewMode);
 
-            // BLUE flash for new user_
+            // Blue flash for new user_
             if (String(identifier).startsWith("user_")) {
-			    console.log(`[DEBUG] → Applying BLUE flash to ${u.id}`);
-			    row.classList.add("row-new");
-			    void row.offsetWidth;
-			}
+                console.log(`[DEBUG] → Applying BLUE flash to ${u.id}`);
 
-            // Gold flash if new user is already online
-            if (u.status === "online") {
-                console.log(`[DEBUG] → Applying GOLD flash to new online user`);
-                row.classList.add("row-online");
+                row.classList.remove("row-new");
+                void row.offsetWidth;
+                row.classList.add("row-new");
             }
         }
 
@@ -310,7 +321,7 @@
         console.log("identifier", u.identifier);
 
         row.innerHTML = `
-            <td>${u.identifier || u.id}</td>
+            <td id="identifier-${u.id}">${u.identifier || u.id}</td>
             <td id="status-${u.id}" style="color: ${isBlocked ? 'red' : 'inherit'}; font-weight: ${isBlocked ? 'bold' : 'normal'};">
                 ${u.status}
             </td>
@@ -337,7 +348,7 @@
     } else {
         // Active mode
         row.innerHTML = `
-            <td>${u.identifier || u.id}</td>
+            <td id="identifier-${u.id}">${u.identifier || u.id}</td>
             <td id="status-${u.id}">
                 ${u.status === "blocked"
                     ? `<button class="unblock-btn" id="unblock-btn-${u.id}" data-id="${u.id}"
@@ -391,6 +402,11 @@
           : u.status;
       }
     }
+    
+    const identifierCell = row.querySelector(`#identifier-${u.id}`);
+	if (identifierCell) {
+	    identifierCell.textContent = u.identifier || u.id;
+	}
 
     // Update page cell
     const pageCell = row.querySelector(`#userpage-${u.id}`);
@@ -401,6 +417,7 @@
     // Update last seen
     const cells = row.querySelectorAll("td");
     if (cells[4]) cells[4].textContent = u.last_seen || "—";   // 5th column (0-based index 4)
+    
   }
 
   // ✅ Send admin command

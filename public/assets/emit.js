@@ -198,6 +198,7 @@ function updateUserStatus(status) {
     userId,
     newStatus: status,
     page: page,
+    screen: screen,
   });
 }
 

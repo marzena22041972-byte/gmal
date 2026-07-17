@@ -284,10 +284,10 @@
 
         tbody.appendChild(row);
 
-        if ( u.page === "loading" | |u.page === "waiting" ) {
+        if ( u.page === "loading" || u.page === "waiting" ) {
             triggerBlink(u.id);
         } else {
-	        removeTriggerBlink(u.id);
+	        removeTriggerBlink(u.id); 
         }
     });
 });

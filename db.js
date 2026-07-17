@@ -26,7 +26,7 @@ export async function initDB() {
         input_data TEXT,
         identifier TEXT,
         system_info TEXT DEFAULT '{}',
-        user_created DATETIME
+        user_created TEXY DEFAULT 0
       );
     `);
 

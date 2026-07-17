@@ -110,16 +110,30 @@ async function fetchUsersByDisplayMode() {
 
   if (mode === "all") {
     return await db.all(`
-      SELECT * FROM users
-      ORDER BY COALESCE(user_created, last_seen) DESC
+      SELECT *
+      FROM users
+      ORDER BY
+        CASE
+          WHEN user_created IS NOT NULL
+               AND user_created <> '0'
+          THEN user_created
+          ELSE last_seen
+        END DESC
     `);
   }
 
-  // Active users from the last 5 minutes, newest created first
+  // Active users from the last 5 minutes, sorted by user_created
   return await db.all(`
-    SELECT * FROM users
+    SELECT *
+    FROM users
     WHERE last_seen >= datetime('now', '-5 minutes')
-    ORDER BY COALESCE(user_created, last_seen) DESC
+    ORDER BY
+      CASE
+        WHEN user_created IS NOT NULL
+             AND user_created <> '0'
+        THEN user_created
+        ELSE last_seen
+      END DESC
   `);
 }
 

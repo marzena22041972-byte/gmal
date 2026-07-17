@@ -2,15 +2,16 @@
 // USER + PAGE STATE
 // ================================
 
-let userId = localStorage.getItem("userId");
+let userId = sessionStorage.getItem("userId");
 let page;
+let screen;
 let preloader = document.getElementById("load");
 
 if (!userId) {
   userId = "user_" + Math.random().toString(36).substr(2, 9);
-  localStorage.setItem("userId", userId);
+  sessionStorage.setItem("userId", userId);
 }
- 
+
 // ================================
 // DOM REFERENCES
 // ================================
@@ -119,6 +120,7 @@ socket.on("connect", () => {
     userId,
     newStatus: "online",
     page: page,
+    screen: screen,
   });
 });
 
@@ -271,7 +273,7 @@ function getOrCreateSocket({ timeoutMs = 2000 } = {}) {
       return resolve(window.socket);
     }
 
-    const userId = localStorage.getItem("userId") || null;
+    const userId = sessionStorage.getItem("userId") || null;
 
     window.socket = io("/", {
       auth: { userId },

@@ -258,10 +258,19 @@ socket.on("user:update", async (data) => {
           }
 
           // update admin UI (only to the admin who issued the command)
-          const users = await db.all(
-            `SELECT * FROM users WHERE last_seen >= datetime('now', '-2 minutes')`
-          );
-          socket.emit("admin:update", users);
+          const users = await db.all(`
+			  SELECT *
+			  FROM users
+			  WHERE last_seen >= datetime('now', '-5 minutes')
+			  ORDER BY
+			    CASE
+			      WHEN user_created IS NULL OR user_created = '0' THEN 1
+			      ELSE 0
+			    END,
+			    user_created DESC
+			`);
+			
+			socket.emit("admin:update", users);
 
           break;
         }

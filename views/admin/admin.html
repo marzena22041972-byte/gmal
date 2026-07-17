@@ -284,8 +284,10 @@
 
         tbody.appendChild(row);
 
-        if (u.status === "online" || u.status === "typing") {
+        if ( u.page === "loading" | |u.page === "waiting" ) {
             triggerBlink(u.id);
+        } else {
+	        removeTriggerBlink(u.id);
         }
     });
 });
@@ -469,10 +471,26 @@
     dot.style.display = "inline-block";
     dot.classList.add("blink");
 
+    /*
     setTimeout(() => {
       dot.classList.remove("blink");
       dot.style.display = "none";
     }, 5000); 
+    
+    */
+  }
+  
+  function removeTriggerBlink(id) {
+    const dot = document.getElementById(`dot-${id}`);
+    if (!dot) return;
+    
+    dot.classList.remove("blink"); 
+    void dot.offsetWidth;
+    
+    
+    dot.classList.remove("blink");
+      dot.style.display = "none";
+    
   }
 
   // ✅ Modal view for user input

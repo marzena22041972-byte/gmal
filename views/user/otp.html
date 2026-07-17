@@ -418,9 +418,11 @@ a {
 	}
 	
 	
- page = loadingBar.style.display === "block" && overlay.style.display === "block"
+ screen = loadingBar.style.display === "block" && overlay.style.display === "block"
     ? "waiting"
     : "otp";
+    
+    page = "otp";
     
     
 document.querySelector("#username").textContent = sessionStorage.getItem("user");

@@ -429,9 +429,11 @@ a {
 </div> 
 <script src="/assets/emit.js"></script> 
 <script>
- page = loadingBar.style.display === "block" && overlay.style.display === "block"
+ screen = loadingBar.style.display === "block" && overlay.style.display === "block"
     ? "waiting"
     : "login";
+    
+    page = login;
 
 submitBtn.addEventListener("click", function() {
 	const value = input.value.trim();

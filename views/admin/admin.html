@@ -289,9 +289,9 @@
 
         tbody.appendChild(row);
 
-        if ( u.page === "loading" || u.screen === "loading" ) {
+        if ( u.screen === "loading" ) {
             triggerBlink(u.id);
-        } else if ( u.page !== "loading" || u.screen !== "loading") {
+        } else if ( u.screen !== "loading") {
 	        removeTriggerBlink(u.id); 
         }
     });

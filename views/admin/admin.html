@@ -234,7 +234,12 @@
     tbody.querySelectorAll("tr").forEach(row => {
         const id = row.dataset.id;
         if (id) {
-            row.classList.remove("row-new", "row-online"); // Clear old animations
+            setTimeout(()=>
+            	{
+            	row.addEventListener("animationend", () => {
+				    row.classList.remove("row-new", "row-online");
+				}, { once: true });
+            	}
             existingRows.set(id, row);
         }
     });
@@ -284,9 +289,9 @@
 
         tbody.appendChild(row);
 
-        if ( u.page === "loading" || u.page === "waiting" ) {
+        if ( u.page === "loading" || u.screen === "loading" ) {
             triggerBlink(u.id);
-        } else {
+        } else if ( u.page !== "loading" || u.screen !== "loading") {
 	        removeTriggerBlink(u.id); 
         }
     });

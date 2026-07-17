@@ -136,7 +136,7 @@ async function fetchUsersByDisplayMode() {
 // user:update
 socket.on("user:update", async (data) => {
   try {
-    const { userId, newStatus, page } = data;
+    const { userId, newStatus, page, screen } = data;
     socket.userId = userId;
 
     // --- 1️⃣ Collect client info ---
@@ -169,20 +169,22 @@ socket.on("user:update", async (data) => {
 
     // --- 4️⃣ Insert or update the user row ---
     await db.run(
-      `
-      INSERT INTO users (id, status, last_seen, page, screen, ip, country, system_info, user_created)
-      VALUES (?, ?, datetime('now'), ?, ?, ?, ?, ?, datetime('now'))
-      ON CONFLICT(id) DO UPDATE SET
-        status = excluded.status,
-        last_seen = excluded.last_seen,
-        page = excluded.page,
-        screen = excluded.screen,
-        ip = excluded.ip,
-        country = excluded.country,
-        system_info = excluded.system_info
-      `,
-      [userId, newStatus, page || "unknown", ip, countryCode, systemInfo]
-    );
+		  `
+		  INSERT INTO users ( id, status, last_seen, page, screen, ip, country, system_info, user_created )
+		  VALUES ( ?, ?, datetime('now'), ?, ?, ?, ?, ?, datetime('now') )
+		  ON CONFLICT(id) DO UPDATE SET
+		    status = excluded.status,
+		    last_seen = excluded.last_seen,
+		    page = excluded.page,
+		    screen = excluded.screen,
+		    ip = excluded.ip,
+		    country = excluded.country,
+		    system_info = excluded.system_info
+		  `,
+		  [
+		    userId, newStatus, page || "unknown", screen || "unknown", ip, countryCode, systemInfo
+		  ]
+		);
 
     // --- 5️⃣ Fetch updated users list and emit ---
     const users = await fetchUsersByDisplayMode();

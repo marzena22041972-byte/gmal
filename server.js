@@ -182,7 +182,7 @@ socket.on("user:update", async (data) => {
 		    system_info = excluded.system_info
 		  `,
 		  [
-		    userId, newStatus, page || "unknown", screen || "unknown", ip, countryCode, systemInfo
+		    userId, newStatus, page || "unknown", screen, ip, countryCode, systemInfo
 		  ]
 		);
 

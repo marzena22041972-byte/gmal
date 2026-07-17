@@ -232,18 +232,17 @@
     // Save references to existing rows
     const existingRows = new Map();
     tbody.querySelectorAll("tr").forEach(row => {
-        const id = row.dataset.id;
-        if (id) {
-            setTimeout(()=>
-            	{
-            	row.addEventListener("animationend", () => {
-				    row.classList.remove("row-new", "row-online");
-				}, { once: true });
-            	}
-            existingRows.set(id, row);
-        }
-    });
+    const id = row.dataset.id;
 
+    if (id) {
+        row.addEventListener("animationend", () => {
+            row.classList.remove("row-new", "row-online");
+        }, { once: true });
+
+        existingRows.set(id, row);
+    }
+});
+    
     console.log(`[DEBUG] Before rebuild - ${existingRows.size} existing rows`);
 
     tbody.innerHTML = "";
